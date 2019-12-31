@@ -27,54 +27,67 @@ import view.Cell;
 import view.ScorePanel;
 
 /**
+ * The MainGame class is only instantiated once. This MainGame object runs and controls everything.
+ * It is a JFrame, and listens for the mouse and actions. It is the game window.
  * @author Tyson J LaFollette
- * Maingame object that starts everything.
  */
 public class MainGame extends JFrame implements MouseListener, ActionListener{
+
 	/**
-	 * content pane.
+	 * The content pane within the main window.
 	 */
 	private JPanel pane;
+
 	/**
-	 * Number of mines the player has marked correctly.
-	 */
-	private int minesRight = 0;
-	/**
-	 * Number of mines marked.
+	 * How many mines the player has marked.
 	 */
 	private int minesMarked;
+
+	/**
+	 * How many mines the player has marked correctly.
+	 */
+	private int minesRight = 0;
+
 	/**
 	 * Whether the player has won.
 	 */
 	boolean win = false;
+
 	/**
-	 * Number of seconds elapsed.
+	 * Number of seconds elapsed this game.
 	 */
 	private int time = 0;
+
 	/**
 	 * Stores mine locations, and adjacency counts.
 	 */
 	ArrayList<Character> minefield = new ArrayList<Character>();
+
 	/**
 	 * What state the player has left each cell in.
 	 */
 	ArrayList<Character> cellStates = new ArrayList<Character>();
+
 	/**
 	 * List of the cells themselves. Contain no data, only display.
 	 */
 	ArrayList<Cell>mineCells = new ArrayList<Cell>();
+
 	/**
 	 * Whether the given cell has been visited in the current sweep.
 	 */
 	ArrayList<Boolean>visits = new ArrayList<Boolean>();
+
 	/**
 	 * The scoreboard.
 	 */
 	private ScorePanel scorePanel;
+
 	/**
 	 * Contains all mine cells.
 	 */
 	private JPanel gamePanel;
+
 	private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
 	private ImageIcon flagIcon = new ImageIcon("data/flag.png");
 	private ImageIcon questionIcon = new ImageIcon("data/question.png");
@@ -86,13 +99,14 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	private ImageIcon sixIcon = new ImageIcon("data/six.png");
 	private ImageIcon sevenIcon = new ImageIcon("data/seven.png");
 	private ImageIcon eightIcon = new ImageIcon("data/eight.png");
+
 	/**
 	 * Timer for keeping score.
 	 */
 	private Timer timer = new Timer(1000, this);
 	
 	/**
-	 * Constructor, starts game.
+	 * Constructor. The program begins with this.
 	 */
 	public MainGame(){
 		InitGraphics();
@@ -103,7 +117,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	}
 	
 	/**
-	 * Creates mines, places them.
+	 * Creates the desired number of mines within the playing field.
 	 */
 	public void populateField(){
 		for(int i = 0; i < 576; i++){
@@ -129,9 +143,9 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	}
 	
 	/**
-	 * @param index
-	 * @return
-	 * Checks if given index contains a mine.
+	 * Checks if the Cell related to this index number contains a mine.
+	 * @param index the index number of the Cell to check.
+	 * @return A boolean indicating whether the Cell at the given index has a mine or not.
 	 */
 	public int isMine(int index){
 		try{
@@ -180,8 +194,8 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 		}
 	}
 	/**
-	 * @param index
-	 * Handles what cells to check if the current cell has no adjacent mines.
+	 * Makes many cells reveal themselves if the player clicks on one that has no adjacent mines.
+	 * @param index the unique index of the Cell to examine.
 	 */
 	public void caseZero(int index){
 		if(index == 0){
@@ -243,9 +257,10 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 			sweepCell(mineCells.get(index+25));
 		}
 	}
+
 	/**
-	 * @param theCell
 	 * Starts sweep of cells.
+	 * @param theCell
 	 */
 	public void startSweep(Cell theCell){
 		int index = theCell.getIndex();
@@ -254,9 +269,10 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 		}
 		sweepCell(theCell);
 	}
+
 	/**
-	 * @param theCell
-	 * Sweeps the given cell, checking for mines, etc.
+	 * Makes the given Cell reveal its contents. This is called when the player clicks on a Cell.
+	 * @param theCell the Cell to reveal.
 	 */
 	public void sweepCell(Cell theCell){
 		int index = theCell.getIndex();
@@ -317,6 +333,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 			}
 		}
 	}
+
 	/**
 	 * Initializes view components.
 	 */
@@ -334,14 +351,16 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 		gamePanel.setLayout(new GridLayout(24,24));
 		scorePanel.setMines(100);
 	}
+
 	/**
-	 * Starts teh timer.
+	 * Starts the game timer.
 	 */
 	public void startGame(){
 		timer.start();
 	}
+
 	/**
-	 * Starts a new game, resetting values.
+	 * Starts a new game, resetting values. This is called when the player clicks on the start button.
 	 */
 	public void newGame(){
 		time = 0;
@@ -362,6 +381,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 		calculateAdjacencies();
 		update(getGraphics());
 	}
+
 	/**
 	 * Checks whether the player has won each time they press a cell.
 	 */
@@ -377,6 +397,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 			GameOver();
 		}
 	}
+
 	/**
 	 * Displays final messages, shows mine locations.
 	 */
@@ -406,19 +427,23 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 			JOptionPane.showMessageDialog(null,"End!");
 		}
 	}
+
 	/**
-	 * @param args
-	 * Main, simply creates a thread for the game.
+	 * Main, simply creates a thread for the game and instantiates a MainGame object which handles everything.
+	 * @param args command line arguments.
 	 */
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable(){
-
 			@Override
 			public void run() {
 				new MainGame();
 			}});
 	}
 
+	/**
+	 * Handles mouse events.
+	 * @param arg0
+	 */
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 		// TODO Auto-generated method stub
@@ -482,6 +507,10 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 		
 	}
 
+	/**
+	 * Handles generic action events. Primarily used to update game timer.
+	 * @param arg0
+	 */
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// TODO Auto-generated method stub

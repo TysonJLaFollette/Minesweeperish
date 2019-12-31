@@ -17,68 +17,71 @@ import javax.swing.JPanel;
 
 /**
  * @author Tyson
- * A scorepanel that appears atop the game.
+ * The ScorePanel is a rectangular region that displays the timer and current score. It is an extension of the JPanel class.
  */
 public class ScorePanel extends JPanel{
+
 	/**
 	 * Contains number of mines remaining.
 	 */
 	private JLabel minesLabel = new JLabel("Mines:");
+
 	/**
 	 * Contains the timer counter.
 	 */
 	private JLabel timerLabel = new JLabel("Time:");
+
 	/**
 	 * The icon that appears on the start button.
 	 */
 	private ImageIcon startIcon = new ImageIcon("data/mine.gif");
+
 	/**
-	 * the start button.
+	 * The start button. When pressed, it should start the game.
 	 */
 	private JButton startButton = new JButton(startIcon);
+
 	/**
-	 * different font, because grading rubric.
+	 * A font to use within the ScorePanel. Only necessary because of the grading rubric.
 	 */
 	Font font = new Font("Serif", Font.ITALIC, 20);
 	
 	/**
-	 * @param listener
-	 * constructor
+     * Sets defaults for the ScorePanel.
+	 * @param listener An ActionListener for the start button within the ScorePanel.
 	 */
 	public ScorePanel(ActionListener listener){
-		startButton.addActionListener(listener);
-		
-		
+		this.setLayout(new GridBagLayout());
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridwidth = 1;
+		this.add(minesLabel, constraints);
+		constraints.gridx = 1;
+		constraints.gridwidth = 1;
+		this.add(startButton, constraints);
+		constraints.gridx = 2;
+		constraints.gridwidth = 1;
+		this.add(timerLabel, constraints);
+        startButton.addActionListener(listener);
+        startButton.setPreferredSize(new Dimension(25,25));
         minesLabel.setFont(font);
         timerLabel.setFont(font);
-		
-		this.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		startButton.setPreferredSize(new Dimension(25,25));
-		
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridx = 0;
-		c.gridy = 0;
-		c.gridwidth = 1;
-		this.add(minesLabel, c);
-		c.gridx = 1;
-		c.gridwidth = 1;
-		this.add(startButton, c);
-		c.gridx = 2;
-		c.gridwidth = 1;
-		this.add(timerLabel, c);
 	}
+
 	/**
-	 * @param num
-	 * sets number of mines to display
+     * Sets how many mines the ScorePanel says remain.
+	 * @param num The quantity of mines to report.
 	 */
 	public void setMines(int num){
 		minesLabel.setText("Mines: " + Integer.toString(num));
 		update(getGraphics());
 	}
+
 	/**
-	 * @param secs
-	 * sets number of seconds to display.
+     * Sets the number of seconds the ScorePanel says the game has been running.
+	 * @param secs The number of seconds to display.
 	 */
 	public void setTime(int secs){
 		timerLabel.setText("Time: " + Integer.toString(secs));

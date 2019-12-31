@@ -1,3 +1,2 @@
 # Minesweeperish
-Minesweeper clone. Written in Java
-b
+Minesweeper clone. Written in Java.
