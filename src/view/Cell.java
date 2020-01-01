@@ -1,14 +1,9 @@
-/**
- * 
- */
 package view;
 
 import java.awt.Color;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 /**
  * Cells are JButtons that populate the minefield. They are the square regions that can either contain a mine or not.

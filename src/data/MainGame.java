@@ -1,28 +1,20 @@
-/**
- * 
- */
 package data;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-
 import view.Cell;
 import view.ScorePanel;
 
@@ -34,24 +26,14 @@ import view.ScorePanel;
 public class MainGame extends JFrame implements MouseListener, ActionListener{
 
 	/**
-	 * The content pane within the main window.
-	 */
-	private JPanel pane;
-
-	/**
 	 * How many mines the player has marked.
 	 */
 	private int minesMarked;
 
 	/**
-	 * How many mines the player has marked correctly.
-	 */
-	private int minesRight = 0;
-
-	/**
 	 * Whether the player has won.
 	 */
-	boolean win = false;
+    private boolean win;
 
 	/**
 	 * Number of seconds elapsed this game.
@@ -61,22 +43,22 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	/**
 	 * Stores mine locations, and adjacency counts.
 	 */
-	ArrayList<Character> minefield = new ArrayList<Character>();
+    private ArrayList<Character> minefield;
 
 	/**
 	 * What state the player has left each cell in.
 	 */
-	ArrayList<Character> cellStates = new ArrayList<Character>();
+    private ArrayList<Character> cellStates;
 
 	/**
 	 * List of the cells themselves. Contain no data, only display.
 	 */
-	ArrayList<Cell>mineCells = new ArrayList<Cell>();
+    private ArrayList<Cell>mineCells;
 
 	/**
 	 * Whether the given cell has been visited in the current sweep.
 	 */
-	ArrayList<Boolean>visits = new ArrayList<Boolean>();
+    private ArrayList<Boolean>visits;
 
 	/**
 	 * The scoreboard.
@@ -88,6 +70,10 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 */
 	private JPanel gamePanel;
 
+
+	/**
+	 * Images for the various states of Cells.
+	 */
 	private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
 	private ImageIcon flagIcon = new ImageIcon("data/flag.png");
 	private ImageIcon questionIcon = new ImageIcon("data/question.png");
@@ -114,12 +100,17 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 		calculateAdjacencies();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
-	}
+        win = false;
+        minefield = new ArrayList<>();
+        cellStates = new ArrayList<>();
+        mineCells = new ArrayList<>();
+        visits = new ArrayList<>();
+    }
 	
 	/**
 	 * Creates the desired number of mines within the playing field.
 	 */
-	public void populateField(){
+    private void populateField(){
 		for(int i = 0; i < 576; i++){
 			visits.add(false);
 		}
@@ -147,12 +138,12 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 * @param index the index number of the Cell to check.
 	 * @return A boolean indicating whether the Cell at the given index has a mine or not.
 	 */
-	public int isMine(int index){
+    private int isMine(int index){
 		try{
 			if(minefield.get(index)=='m'){
 				return 1;
 			}
-		}catch(IndexOutOfBoundsException e){}
+		}catch(IndexOutOfBoundsException ignored){}
 		
 		return 0;
 	}
@@ -160,7 +151,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	/**
 	 * Determines the number of adjacent mines for every cell. Marks info.
 	 */
-	public void calculateAdjacencies(){
+    private void calculateAdjacencies(){
 		for(int i = 0; i < 576; i++){
 			int count = 0;
 			if(minefield.get(i) == 'm'){
@@ -195,9 +186,9 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	}
 	/**
 	 * Makes many cells reveal themselves if the player clicks on one that has no adjacent mines.
-	 * @param index the unique index of the Cell to examine.
-	 */
-	public void caseZero(int index){
+     * @param index the unique index of the Cell to examine.
+     */
+    private void caseZero(int index){
 		if(index == 0){
 			sweepCell(mineCells.get(index+1));
 			sweepCell(mineCells.get(index+24));
@@ -260,9 +251,9 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 
 	/**
 	 * Starts sweep of cells.
-	 * @param theCell
+	 * @param theCell The Cell object to begin a sweep on.
 	 */
-	public void startSweep(Cell theCell){
+    private void startSweep(Cell theCell){
 		int index = theCell.getIndex();
 		for(int i = 0; i < 576; i++){
 			visits.set(index, false);
@@ -274,13 +265,13 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 * Makes the given Cell reveal its contents. This is called when the player clicks on a Cell.
 	 * @param theCell the Cell to reveal.
 	 */
-	public void sweepCell(Cell theCell){
+    private void sweepCell(Cell theCell){
 		int index = theCell.getIndex();
-		if(visits.get(theCell.getIndex())== true){
+		if(visits.get(theCell.getIndex())){
 			return;
 		}
 		visits.set(index, true);
-		if(theCell.isEnabled() == true){
+		if(theCell.isEnabled()){
 			switch (minefield.get(index)){
 			case 'm':
 				GameOver();
@@ -337,13 +328,13 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	/**
 	 * Initializes view components.
 	 */
-	public void InitGraphics(){
+    private void InitGraphics(){
 		scorePanel = new ScorePanel(this);
 		gamePanel = new JPanel();
 		this.setIconImage(mineIcon.getImage());
-		this.setTitle("Minesweeper-ish");
+		this.setTitle("minesweeperish");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		pane = (JPanel)this.getContentPane();
+		JPanel pane = (JPanel)this.getContentPane();
 		this.setSize(500, 500);
 		pane.setLayout(new BorderLayout());
 		pane.add(scorePanel, BorderLayout.NORTH);
@@ -362,7 +353,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	/**
 	 * Starts a new game, resetting values. This is called when the player clicks on the start button.
 	 */
-	public void newGame(){
+    private void newGame(){
 		time = 0;
 		timer.stop();
 		for(int i = 0; i < 576; i++){
@@ -385,8 +376,8 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	/**
 	 * Checks whether the player has won each time they press a cell.
 	 */
-	public void flagCheck(){
-		minesRight = 0;
+    private void flagCheck(){
+		int minesRight = 0;
 		for(int i = 0; i < 576; i++){
 			if(minefield.get(i) == 'm' && cellStates.get(i) == 'f'){
 				minesRight++;
@@ -401,7 +392,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	/**
 	 * Displays final messages, shows mine locations.
 	 */
-	public void GameOver(){
+    private void GameOver(){
 		timer.stop();
 		for(int i = 0; i < 576; i++){
 			mineCells.get(i).setEnabled(false);
@@ -442,11 +433,10 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 
 	/**
 	 * Handles mouse events.
-	 * @param arg0
+	 * @param arg0 The name of the MousEvent being handled...?
 	 */
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
 		Object source = arg0.getSource();
 		if(source instanceof Cell){
 			if(SwingUtilities.isLeftMouseButton(arg0)){
@@ -459,7 +449,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 			
 			else if(SwingUtilities.isRightMouseButton(arg0)){
 				int id = ((Cell)source).getIndex();
-				if(((Cell)source).isEnabled() == true){
+				if(((Cell) source).isEnabled()){
 					if(cellStates.get(id)=='b'){
 						cellStates.set(id, 'f');
 						((Cell)source).setImage(flagIcon);
@@ -484,36 +474,23 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseEntered(MouseEvent e) {}
 
 	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseExited(MouseEvent e) {}
 
 	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mousePressed(MouseEvent e) {}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseReleased(MouseEvent e) {}
 
 	/**
 	 * Handles generic action events. Primarily used to update game timer.
-	 * @param arg0
+	 * @param arg0 The name of the ActionEvent being handled.
 	 */
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
 		Object source = arg0.getSource();
 		if(source!= timer){
 			newGame();
