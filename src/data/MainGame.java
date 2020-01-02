@@ -25,6 +25,21 @@ import view.ScorePanel;
  */
 public class MainGame extends JFrame implements MouseListener, ActionListener{
 
+    /**
+     * The number of rows in the minefield area.
+     */
+    private int numRows;
+
+    /**
+     * The number of columns in the minefield area.
+     */
+    private int numCols;
+
+    /**
+     * The number of mines in the minefield.
+     */
+    private int numMines;
+
 	/**
 	 * How many mines the player has marked.
 	 */
@@ -46,7 +61,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
     private ArrayList<Character> minefield;
 
 	/**
-	 * What state the player has left each cell in.
+	 * What state the player has left each cell in. Is it flagged/swept, how many adjacent mines? etc.
 	 */
     private ArrayList<Character> cellStates;
 
@@ -58,7 +73,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	/**
 	 * Whether the given cell has been visited in the current sweep.
 	 */
-    private ArrayList<Boolean>visits;
+    private ArrayList<Boolean> visits;
 
 	/**
 	 * The scoreboard.
@@ -94,41 +109,45 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	/**
 	 * Constructor. The program begins with this.
 	 */
-	public MainGame(){
-		InitGraphics();
-		populateField();
-		calculateAdjacencies();
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
+	public MainGame(int numRows, int numCols, int numMines){
+	    this.numRows = numRows;
+	    this.numCols = numCols;
+	    this.numMines = numMines;
         win = false;
         minefield = new ArrayList<>();
         cellStates = new ArrayList<>();
         mineCells = new ArrayList<>();
         visits = new ArrayList<>();
+		InitGraphics();
+		initializeField();
+		calculateAdjacencies();
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
     }
 	
 	/**
 	 * Creates the desired number of mines within the playing field.
 	 */
-    private void populateField(){
-		for(int i = 0; i < 576; i++){
+    private void initializeField(){
+		for(int i = 0; i < numRows * numCols; i++){
 			visits.add(false);
 		}
-		for(int i = 0; i <576; i++){
+		for(int i = 0; i < numRows * numCols; i++){
 			Cell tmpCell = new Cell();
 			tmpCell.setIndex(i);
 			tmpCell.addMouseListener(this);
 			mineCells.add(tmpCell);
 			gamePanel.add(tmpCell);
 		}
-		for(int i = 0; i < 100; i++){
+		for(int i = 0; i < numMines; i++){
 			minefield.add('m');
 		}
-		for(int i = 0; i < 476; i++){
+		for(int i = 0; i < numRows * numCols; i++){
 			minefield.add('0');
 		}
 		Collections.shuffle(minefield);
-		for(int i = 0; i < 576;  i++){
+
+		for(int i = 0; i < numRows * numCols;  i++){
 			cellStates.add('b');
 		}
 	}
@@ -152,7 +171,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 * Determines the number of adjacent mines for every cell. Marks info.
 	 */
     private void calculateAdjacencies(){
-		for(int i = 0; i < 576; i++){
+		for(int i = 0; i < numRows * numCols; i++){
 			int count = 0;
 			if(minefield.get(i) == 'm'){
 				continue;
@@ -206,7 +225,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 			sweepCell(mineCells.get(index+24));
 			sweepCell(mineCells.get(index+25));
 		}
-		else if (index == 576){
+		else if (index == numRows * numCols){
 			sweepCell(mineCells.get(index-25));
 			sweepCell(mineCells.get(index-24));
 			sweepCell(mineCells.get(index-1));
@@ -255,7 +274,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 */
     private void startSweep(Cell theCell){
 		int index = theCell.getIndex();
-		for(int i = 0; i < 576; i++){
+		for(int i = 0; i < numRows * numCols; i++){
 			visits.set(index, false);
 		}
 		sweepCell(theCell);
@@ -339,8 +358,8 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 		pane.setLayout(new BorderLayout());
 		pane.add(scorePanel, BorderLayout.NORTH);
 		pane.add(gamePanel);
-		gamePanel.setLayout(new GridLayout(24,24));
-		scorePanel.setMines(100);
+		gamePanel.setLayout(new GridLayout(numRows,numCols));
+		scorePanel.setMines(numMines);
 	}
 
 	/**
@@ -356,12 +375,12 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
     private void newGame(){
 		time = 0;
 		timer.stop();
-		for(int i = 0; i < 576; i++){
+		for(int i = 0; i < numRows * numCols; i++){
 			gamePanel.remove(0);
 			mineCells.remove(0);
 			cellStates.set(i,'b');
 		}
-		for(int i = 0; i < 576; i++){
+		for(int i = 0; i < numRows * numCols; i++){
 			Cell tmpCell = new Cell();
 			tmpCell.setIndex(i);
 			tmpCell.addMouseListener(this);
@@ -378,12 +397,12 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 */
     private void flagCheck(){
 		int minesRight = 0;
-		for(int i = 0; i < 576; i++){
+		for(int i = 0; i < numRows * numCols; i++){
 			if(minefield.get(i) == 'm' && cellStates.get(i) == 'f'){
 				minesRight++;
 			}
 		}
-		if(minesRight == 100){
+		if(minesRight == numMines){
 			win = true;
 			GameOver();
 		}
@@ -394,7 +413,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 */
     private void GameOver(){
 		timer.stop();
-		for(int i = 0; i < 576; i++){
+		for(int i = 0; i < numRows * numCols; i++){
 			mineCells.get(i).setEnabled(false);
 			if(minefield.get(i)=='m'){
 				if(cellStates.get(i) == '?'){
@@ -427,7 +446,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 		SwingUtilities.invokeLater(new Runnable(){
 			@Override
 			public void run() {
-				new MainGame();
+				new MainGame(24,24,100);
 			}});
 	}
 
@@ -454,13 +473,13 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 						cellStates.set(id, 'f');
 						((Cell)source).setImage(flagIcon);
 						minesMarked++;
-						scorePanel.setMines(100-minesMarked);
+						scorePanel.setMines(numMines-minesMarked);
 					}
 					else if(cellStates.get(id)=='f'){
 						cellStates.set(id,'?');
 						((Cell)source).setImage(questionIcon);
 						minesMarked--;
-						scorePanel.setMines(100-minesMarked);
+						scorePanel.setMines(numMines-minesMarked);
 					}
 					else if(cellStates.get(id)=='?'){
 						cellStates.set(id,'b');
