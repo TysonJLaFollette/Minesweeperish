@@ -9,6 +9,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -71,11 +72,6 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
     private ArrayList<Cell>mineCells;
 
 	/**
-	 * Whether the given cell has been visited in the current sweep.
-	 */
-    private ArrayList<Boolean> visits;
-
-	/**
 	 * The scoreboard.
 	 */
 	private ScorePanel scorePanel;
@@ -117,7 +113,6 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
         minefield = new ArrayList<>();
         cellStates = new ArrayList<>();
         mineCells = new ArrayList<>();
-        visits = new ArrayList<>();
 		InitGraphics();
 		initializeField();
 		calculateAdjacencies();
@@ -129,9 +124,6 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 * Creates the desired number of mines within the playing field.
 	 */
     private void initializeField(){
-		for(int i = 0; i < numRows * numCols; i++){
-			visits.add(false);
-		}
 		for(int i = 0; i < numRows * numCols; i++){
 			Cell tmpCell = new Cell();
 			tmpCell.setIndex(i);
@@ -207,64 +199,64 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 * Makes many cells reveal themselves if the player clicks on one that has no adjacent mines.
      * @param index the unique index of the Cell to examine.
      */
-    private void caseZero(int index){
+    private void caseZero(int index, List<Boolean> visits){
 		if(index == 0){
-			sweepCell(mineCells.get(index+1));
-			sweepCell(mineCells.get(index+24));
-			sweepCell(mineCells.get(index+25));
+			sweepCell(mineCells.get(index+1), visits);
+			sweepCell(mineCells.get(index+24), visits);
+			sweepCell(mineCells.get(index+25), visits);
 		}
 		else if (index == 23){
-			sweepCell(mineCells.get(index-1));
-			sweepCell(mineCells.get(index+23));
-			sweepCell(mineCells.get(index+24));
+			sweepCell(mineCells.get(index-1), visits);
+			sweepCell(mineCells.get(index+23), visits);
+			sweepCell(mineCells.get(index+24), visits);
 		}
 		else if(index < 24){
-			sweepCell(mineCells.get(index-1));
-			sweepCell(mineCells.get(index+1));
-			sweepCell(mineCells.get(index+23));
-			sweepCell(mineCells.get(index+24));
-			sweepCell(mineCells.get(index+25));
+			sweepCell(mineCells.get(index-1), visits);
+			sweepCell(mineCells.get(index+1), visits);
+			sweepCell(mineCells.get(index+23), visits);
+			sweepCell(mineCells.get(index+24), visits);
+			sweepCell(mineCells.get(index+25), visits);
 		}
 		else if (index == numRows * numCols){
-			sweepCell(mineCells.get(index-25));
-			sweepCell(mineCells.get(index-24));
-			sweepCell(mineCells.get(index-1));
+			sweepCell(mineCells.get(index-25), visits);
+			sweepCell(mineCells.get(index-24), visits);
+			sweepCell(mineCells.get(index-1), visits);
 		}
 		else if (index ==552){
-			sweepCell(mineCells.get(index-24));
-			sweepCell(mineCells.get(index-23));
-			sweepCell(mineCells.get(index+1));
+			sweepCell(mineCells.get(index-24), visits);
+			sweepCell(mineCells.get(index-23), visits);
+			sweepCell(mineCells.get(index+1), visits);
 		}
 		else if(index >552){
-			sweepCell(mineCells.get(index-25));
-			sweepCell(mineCells.get(index-24));
-			sweepCell(mineCells.get(index-23));
-			sweepCell(mineCells.get(index-1));
-			sweepCell(mineCells.get(index+1));
+			sweepCell(mineCells.get(index-25), visits);
+			sweepCell(mineCells.get(index-24), visits);
+			sweepCell(mineCells.get(index-23), visits);
+			sweepCell(mineCells.get(index-1), visits);
+			sweepCell(mineCells.get(index+1), visits);
 		}
 		else if(index%24 == 0){//on left edge
-			sweepCell(mineCells.get(index-24));
-			sweepCell(mineCells.get(index-23));
-			sweepCell(mineCells.get(index+1));
-			sweepCell(mineCells.get(index+24));
-			sweepCell(mineCells.get(index+25));
+			sweepCell(mineCells.get(index-24), visits);
+			sweepCell(mineCells.get(index-23), visits);
+			sweepCell(mineCells.get(index+1), visits);
+			sweepCell(mineCells.get(index+24), visits);
+			sweepCell(mineCells.get(index+25), visits);
 		}
 		else if ((index+1)%23 == 0){//on right edge
-			sweepCell(mineCells.get(index-25));
-			sweepCell(mineCells.get(index-24));
-			sweepCell(mineCells.get(index-1));
-			sweepCell(mineCells.get(index+23));
-			sweepCell(mineCells.get(index+24));
+			sweepCell(mineCells.get(index-25), visits);
+			sweepCell(mineCells.get(index-24), visits);
+			sweepCell(mineCells.get(index-1), visits);
+			sweepCell(mineCells.get(index+23), visits);
+			sweepCell(mineCells.get(index+24), visits);
 		}
 		else {
-			sweepCell(mineCells.get(index-25));
-			sweepCell(mineCells.get(index-24));
-			sweepCell(mineCells.get(index-23));
-			sweepCell(mineCells.get(index-1));
-			sweepCell(mineCells.get(index+1));
-			sweepCell(mineCells.get(index+23));
-			sweepCell(mineCells.get(index+24));
-			sweepCell(mineCells.get(index+25));
+			sweepCell(mineCells.get(index-25), visits);
+			sweepCell(mineCells.get(index-24), visits);
+			sweepCell(mineCells.get(index-23), visits);
+			sweepCell(mineCells.get(index-1), visits);
+			sweepCell(mineCells.get(index+1), visits);
+			sweepCell(mineCells.get(index+23), visits);
+			sweepCell(mineCells.get(index+24), visits);
+			sweepCell(mineCells.get(index+25), visits);
 		}
 	}
 
@@ -274,17 +266,18 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	 */
     private void startSweep(Cell theCell){
 		int index = theCell.getIndex();
+		List<Boolean> visits = new ArrayList<>();;
 		for(int i = 0; i < numRows * numCols; i++){
-			visits.set(index, false);
+			visits.add(false);
 		}
-		sweepCell(theCell);
+		sweepCell(theCell, visits);
 	}
 
 	/**
 	 * Makes the given Cell reveal its contents. This is called when the player clicks on a Cell.
 	 * @param theCell the Cell to reveal.
 	 */
-    private void sweepCell(Cell theCell){
+    private void sweepCell(Cell theCell, List<Boolean> visits){
 		int index = theCell.getIndex();
 		if(visits.get(theCell.getIndex())){
 			return;
@@ -296,7 +289,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 				GameOver();
 				break;
 			case '0':
-				caseZero(index);
+				caseZero(index, visits);
 				theCell.setEnabled(false);
 				theCell.setBackground(theCell.getBackground().darker());
 				break;
