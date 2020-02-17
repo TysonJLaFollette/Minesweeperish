@@ -1,1 +1,0 @@
-The MainGame class is an implementation of JFrame, and listens for both the mouse and actions.

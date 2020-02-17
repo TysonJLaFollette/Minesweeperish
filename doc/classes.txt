@@ -1,0 +1,76 @@
+@startuml
+class Game {
+    - gamePresenter: Presenter
+    --
+    + initializeGame()
+}
+
+note as GameNote
+    Handles system logic, such as threading.
+end note
+
+Game . GameNote
+
+class View {
+    - gameMenu: Menu
+    - gameBoard: List<List<Button>>
+    --
+}
+
+note as ViewNote
+    Provides a means for the
+    Presenter to display stuff.
+end note
+
+ViewNote .. View
+
+class Presenter {
+    --
+    + SweepCell(int x, int y): void
+    + FlagCell(int x, int y): void
+    + ViewGameboard(): GameState
+    + CheckIfWon(): boolean
+    + CheckIfLost(): boolean
+    + StartGame(): void
+}
+
+note as PresenterNote
+    Implements and enacts game logic.
+    Tells View what to do.
+end note
+
+Presenter .. PresenterNote
+
+class Model {
+    - mineLocations: List<List<Boolean>>
+    - flagLocations: List<List<Boolean>>
+    - sweptLocations: List<List<Boolean>>
+    - adjacencyCounts: List<List<int>>
+    --
+    + HasMine(int x, int y): boolean
+    + HasFlag(int x, int y): boolean
+    + IsSwept(int x, int y): boolean
+    + AddMine(int x, int y): void
+    + AddFlag(int x, int y): void
+    + RemoveFlag(int x, int y): void
+    + MarkSwept(int x, int y): void
+    + CalculateAdjacencies(): void
+    + CountAdjacentMines(int x, int y): int
+}
+
+note as ModelNote
+    Provides a means for the
+    Presenter to store data.
+end note
+
+Model .. ModelNote
+
+Game *-- Presenter : Runs game logic using
+
+View --* Presenter
+View -> Presenter : Links events to functions in
+View <- Presenter : Tells what to display.
+Presenter *-- Model
+Presenter -> Model : Applies game logic to state of
+Model -> Presenter : Gives data to
+@enduml
