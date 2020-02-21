@@ -25,335 +25,442 @@ import view.ScorePanel;
  * @author Tyson J LaFollette
  */
 public class MainGame extends JFrame implements MouseListener, ActionListener{
-
-    /**
-     * The number of rows in the minefield area.
-     */
+    //region Properties
     private int numRows;
-
-    /**
-     * The number of columns in the minefield area.
-     */
     private int numCols;
+    private int numMines;
+	private int minesMarked;
+    private boolean win;
+	private int time = 0;
+    private ArrayList<Character> minefield;
+    private ArrayList<Character> cellStates;
+    private ArrayList<Cell>mineCells;
+	private ScorePanel scorePanel;
+	private JPanel gamePanel;
+    //endregion
+
+    //region Model
+    /**
+     * Checks if the Cell related to this index number contains a mine.
+     * @param index the index number of the Cell to check.
+     * @return A boolean indicating whether the Cell at the given index has a mine or not.
+     */
+    private int isMine(int index){
+        try{
+            if(minefield.get(index)=='m'){
+                return 1;
+            }
+        }catch(IndexOutOfBoundsException ignored){}
+
+        return 0;
+    }
 
     /**
-     * The number of mines in the minefield.
+     * Determines the number of adjacent mines for every cell. Marks info.
      */
-    private int numMines;
+    private void calculateAdjacencies(){
+        for(int i = 0; i < numRows * numCols; i++){
+            int count = 0;
+            if(minefield.get(i) == 'm'){
+                continue;
+            }
+            if(i%24 == 0){//on left edge
+                count += isMine(i-24);
+                count += isMine(i-23);
+                count += isMine(i+1);
+                count += isMine(i+24);
+                count += isMine(i+25);
+            }
+            else if ((i+1)%23 == 0){//on right edge
+                count += isMine(i-25);
+                count += isMine(i-24);
+                count += isMine(i-1);
+                count += isMine(i+23);
+                count += isMine(i+24);
+            }
+            else {
+                count += isMine(i-25);
+                count += isMine(i-24);
+                count += isMine(i-23);
+                count += isMine(i-1);
+                count += isMine(i+1);
+                count += isMine(i+23);
+                count += isMine(i+24);
+                count += isMine(i+25);
+            }
+            minefield.set(i, Integer.toString(count).charAt(0));
+        }
+    }
+    //endregion
 
-	/**
-	 * How many mines the player has marked.
-	 */
-	private int minesMarked;
+    //region View
+    /**
+     * Images for the various states of Cells.
+     */
+    private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
+    private ImageIcon flagIcon = new ImageIcon("data/flag.png");
+    private ImageIcon questionIcon = new ImageIcon("data/question.png");
+    private ImageIcon oneIcon = new ImageIcon("data/one.png");
+    private ImageIcon twoIcon = new ImageIcon("data/two.png");
+    private ImageIcon threeIcon = new ImageIcon("data/three.png");
+    private ImageIcon fourIcon = new ImageIcon("data/four.png");
+    private ImageIcon fiveIcon = new ImageIcon("data/five.png");
+    private ImageIcon sixIcon = new ImageIcon("data/six.png");
+    private ImageIcon sevenIcon = new ImageIcon("data/seven.png");
+    private ImageIcon eightIcon = new ImageIcon("data/eight.png");
 
-	/**
-	 * Whether the player has won.
-	 */
-    private boolean win;
+    /**
+     * Initializes view components.
+     */
+    private void InitGraphics(){
+        scorePanel = new ScorePanel(this);
+        gamePanel = new JPanel();
+        this.setIconImage(mineIcon.getImage());
+        this.setTitle("minesweeperish");
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JPanel pane = (JPanel)this.getContentPane();
+        this.setSize(500, 500);
+        pane.setLayout(new BorderLayout());
+        pane.add(scorePanel, BorderLayout.NORTH);
+        pane.add(gamePanel);
+        gamePanel.setLayout(new GridLayout(numRows,numCols));
+        scorePanel.setMines(numMines);
+    }
 
-	/**
-	 * Number of seconds elapsed this game.
-	 */
-	private int time = 0;
+    /**
+     * Displays final messages, shows mine locations.
+     */
+    private void GameOver(){
+        timer.stop();
+        for(int i = 0; i < numRows * numCols; i++){
+            mineCells.get(i).setEnabled(false);
+            if(minefield.get(i)=='m'){
+                if(cellStates.get(i) == '?'){
+                    mineCells.get(i).setBackground(Color.YELLOW);
+                    mineCells.get(i).setIcon(mineIcon);
+                }
+                else if(cellStates.get(i) == 'b'){
+                    mineCells.get(i).setBackground(Color.RED);
+                    mineCells.get(i).setIcon(mineIcon);
+                }
+                else{
+                    mineCells.get(i).setBackground(Color.GREEN);
+                    mineCells.get(i).setIcon(mineIcon);
+                }
+            }
+        }
+        if(win){
+            JOptionPane.showMessageDialog(null,"End! Your time was " + time + " seconds.");
+        }
+        else{
+            JOptionPane.showMessageDialog(null,"End!");
+        }
+    }
 
-	/**
-	 * Stores mine locations, and adjacency counts.
-	 */
-    private ArrayList<Character> minefield;
+    /**
+     * Handles mouse events.
+     * @param arg0 The name of the MousEvent being handled...?
+     */
+    @Override
+    public void mouseClicked(MouseEvent arg0) {
+        Object source = arg0.getSource();
+        if(source instanceof Cell){
+            if(SwingUtilities.isLeftMouseButton(arg0)){
+                timer.start();
+                int id = ((Cell)source).getIndex();
+                if(cellStates.get(id)!='f'){
+                    startSweep((Cell)source);
+                }
+            }
 
-	/**
-	 * What state the player has left each cell in. Is it flagged/swept, how many adjacent mines? etc.
-	 */
-    private ArrayList<Character> cellStates;
+            else if(SwingUtilities.isRightMouseButton(arg0)){
+                int id = ((Cell)source).getIndex();
+                if(((Cell) source).isEnabled()){
+                    if(cellStates.get(id)=='b'){
+                        cellStates.set(id, 'f');
+                        ((Cell)source).setImage(flagIcon);
+                        minesMarked++;
+                        scorePanel.setMines(numMines-minesMarked);
+                    }
+                    else if(cellStates.get(id)=='f'){
+                        cellStates.set(id,'?');
+                        ((Cell)source).setImage(questionIcon);
+                        minesMarked--;
+                        scorePanel.setMines(numMines-minesMarked);
+                    }
+                    else if(cellStates.get(id)=='?'){
+                        cellStates.set(id,'b');
+                        ((Cell)source).setImage(null);
+                    }
+                }
 
-	/**
-	 * List of the cells themselves. Contain no data, only display.
-	 */
-    private ArrayList<Cell>mineCells;
+            }
+        }
+        flagCheck();
+    }
 
-	/**
-	 * The scoreboard.
-	 */
-	private ScorePanel scorePanel;
+    @Override
+    public void mouseEntered(MouseEvent e) {}
 
-	/**
-	 * Contains all mine cells.
-	 */
-	private JPanel gamePanel;
+    @Override
+    public void mouseExited(MouseEvent e) {}
 
+    @Override
+    public void mousePressed(MouseEvent e) {}
 
-	/**
-	 * Images for the various states of Cells.
-	 */
-	private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
-	private ImageIcon flagIcon = new ImageIcon("data/flag.png");
-	private ImageIcon questionIcon = new ImageIcon("data/question.png");
-	private ImageIcon oneIcon = new ImageIcon("data/one.png");
-	private ImageIcon twoIcon = new ImageIcon("data/two.png");
-	private ImageIcon threeIcon = new ImageIcon("data/three.png");
-	private ImageIcon fourIcon = new ImageIcon("data/four.png");
-	private ImageIcon fiveIcon = new ImageIcon("data/five.png");
-	private ImageIcon sixIcon = new ImageIcon("data/six.png");
-	private ImageIcon sevenIcon = new ImageIcon("data/seven.png");
-	private ImageIcon eightIcon = new ImageIcon("data/eight.png");
+    @Override
+    public void mouseReleased(MouseEvent e) {}
+
+    /**
+     * Handles generic action events. Primarily used to update game timer.
+     * @param arg0 The name of the ActionEvent being handled.
+     */
+    @Override
+    public void actionPerformed(ActionEvent arg0) {
+        Object source = arg0.getSource();
+        if(source!= timer){
+            newGame();
+        }
+        if(source == timer){
+            time++;
+            scorePanel.setTime(time);
+        }
+
+    }
+    //endregion
+
+    //region Presenter
+    /**
+     * Constructor. The program begins with this.
+     */
+    public MainGame(int numRows, int numCols, int numMines){
+        this.numRows = numRows;
+        this.numCols = numCols;
+        this.numMines = numMines;
+        win = false;
+        minefield = new ArrayList<>();
+        cellStates = new ArrayList<>();
+        mineCells = new ArrayList<>();
+        InitGraphics();
+        initializeField();
+        calculateAdjacencies();
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+    }
+
+    /**
+     * Creates the desired number of mines within the playing field.
+     */
+    private void initializeField(){
+        for(int i = 0; i < numRows * numCols; i++){
+            Cell tmpCell = new Cell();
+            tmpCell.setIndex(i);
+            tmpCell.addMouseListener(this);
+            mineCells.add(tmpCell);
+            gamePanel.add(tmpCell);
+        }
+        for(int i = 0; i < numMines; i++){
+            minefield.add('m');
+        }
+        for(int i = 0; i < numRows * numCols; i++){
+            minefield.add('0');
+        }
+        Collections.shuffle(minefield);
+
+        for(int i = 0; i < numRows * numCols;  i++){
+            cellStates.add('b');
+        }
+    }
+
+    /**
+     * Makes many cells reveal themselves if the player clicks on one that has no adjacent mines.
+     * @param index the unique index of the Cell to examine.
+     */
+    private void caseZero(int index, List<Boolean> visits){
+        if(index == 0){
+            sweepCell(mineCells.get(index+1), visits);
+            sweepCell(mineCells.get(index+24), visits);
+            sweepCell(mineCells.get(index+25), visits);
+        }
+        else if (index == 23){
+            sweepCell(mineCells.get(index-1), visits);
+            sweepCell(mineCells.get(index+23), visits);
+            sweepCell(mineCells.get(index+24), visits);
+        }
+        else if(index < 24){
+            sweepCell(mineCells.get(index-1), visits);
+            sweepCell(mineCells.get(index+1), visits);
+            sweepCell(mineCells.get(index+23), visits);
+            sweepCell(mineCells.get(index+24), visits);
+            sweepCell(mineCells.get(index+25), visits);
+        }
+        else if (index == numRows * numCols){
+            sweepCell(mineCells.get(index-25), visits);
+            sweepCell(mineCells.get(index-24), visits);
+            sweepCell(mineCells.get(index-1), visits);
+        }
+        else if (index ==552){
+            sweepCell(mineCells.get(index-24), visits);
+            sweepCell(mineCells.get(index-23), visits);
+            sweepCell(mineCells.get(index+1), visits);
+        }
+        else if(index >552){
+            sweepCell(mineCells.get(index-25), visits);
+            sweepCell(mineCells.get(index-24), visits);
+            sweepCell(mineCells.get(index-23), visits);
+            sweepCell(mineCells.get(index-1), visits);
+            sweepCell(mineCells.get(index+1), visits);
+        }
+        else if(index%24 == 0){//on left edge
+            sweepCell(mineCells.get(index-24), visits);
+            sweepCell(mineCells.get(index-23), visits);
+            sweepCell(mineCells.get(index+1), visits);
+            sweepCell(mineCells.get(index+24), visits);
+            sweepCell(mineCells.get(index+25), visits);
+        }
+        else if ((index+1)%23 == 0){//on right edge
+            sweepCell(mineCells.get(index-25), visits);
+            sweepCell(mineCells.get(index-24), visits);
+            sweepCell(mineCells.get(index-1), visits);
+            sweepCell(mineCells.get(index+23), visits);
+            sweepCell(mineCells.get(index+24), visits);
+        }
+        else {
+            sweepCell(mineCells.get(index-25), visits);
+            sweepCell(mineCells.get(index-24), visits);
+            sweepCell(mineCells.get(index-23), visits);
+            sweepCell(mineCells.get(index-1), visits);
+            sweepCell(mineCells.get(index+1), visits);
+            sweepCell(mineCells.get(index+23), visits);
+            sweepCell(mineCells.get(index+24), visits);
+            sweepCell(mineCells.get(index+25), visits);
+        }
+    }
+
+    /**
+     * Starts sweep of cells.
+     * @param theCell The Cell object to begin a sweep on.
+     */
+    private void startSweep(Cell theCell){
+        int index = theCell.getIndex();
+        List<Boolean> visits = new ArrayList<>();
+        for(int i = 0; i < numRows * numCols; i++){
+            visits.add(false);
+        }
+        sweepCell(theCell, visits);
+    }
+
+    /**
+     * Makes the given Cell reveal its contents. This is called when the player clicks on a Cell.
+     * @param theCell the Cell to reveal.
+     */
+    private void sweepCell(Cell theCell, List<Boolean> visits){
+        int index = theCell.getIndex();
+        if(visits.get(theCell.getIndex())){
+            return;
+        }
+        visits.set(index, true);
+        if(theCell.isEnabled()){
+            switch (minefield.get(index)){
+                case 'm':
+                    GameOver();
+                    break;
+                case '0':
+                    caseZero(index, visits);
+                    theCell.setEnabled(false);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+                case '1':
+                    theCell.setEnabled(false);
+                    theCell.setIcon(oneIcon);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+                case '2':
+                    theCell.setEnabled(false);
+                    theCell.setIcon(twoIcon);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+                case '3':
+                    theCell.setEnabled(false);
+                    theCell.setIcon(threeIcon);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+                case '4':
+                    theCell.setEnabled(false);
+                    theCell.setIcon(fourIcon);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+                case '5':
+                    theCell.setEnabled(false);
+                    theCell.setIcon(fiveIcon);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+                case '6':
+                    theCell.setEnabled(false);
+                    theCell.setIcon(sixIcon);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+                case '7':
+                    theCell.setEnabled(false);
+                    theCell.setIcon(sevenIcon);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+                case '8':
+                    theCell.setEnabled(false);
+                    theCell.setIcon(eightIcon);
+                    theCell.setBackground(theCell.getBackground().darker());
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Starts a new game, resetting values. This is called when the player clicks on the start button.
+     */
+    private void newGame(){
+        time = 0;
+        timer.stop();
+        for(int i = 0; i < numRows * numCols; i++){
+            gamePanel.remove(0);
+            mineCells.remove(0);
+            cellStates.set(i,'b');
+        }
+        for(int i = 0; i < numRows * numCols; i++){
+            Cell tmpCell = new Cell();
+            tmpCell.setIndex(i);
+            tmpCell.addMouseListener(this);
+            mineCells.add(tmpCell);
+            gamePanel.add(tmpCell);
+        }
+        Collections.shuffle(minefield);
+        calculateAdjacencies();
+        update(getGraphics());
+    }
+
+    /**
+     * Checks whether the player has won each time they press a cell.
+     */
+    private void flagCheck(){
+        int minesRight = 0;
+        for(int i = 0; i < numRows * numCols; i++){
+            if(minefield.get(i) == 'm' && cellStates.get(i) == 'f'){
+                minesRight++;
+            }
+        }
+        if(minesRight == numMines){
+            win = true;
+            GameOver();
+        }
+    }
+    //endregion
+
 
 	/**
 	 * Timer for keeping score.
 	 */
 	private Timer timer = new Timer(1000, this);
-	
-	/**
-	 * Constructor. The program begins with this.
-	 */
-	public MainGame(int numRows, int numCols, int numMines){
-	    this.numRows = numRows;
-	    this.numCols = numCols;
-	    this.numMines = numMines;
-        win = false;
-        minefield = new ArrayList<>();
-        cellStates = new ArrayList<>();
-        mineCells = new ArrayList<>();
-		InitGraphics();
-		initializeField();
-		calculateAdjacencies();
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
-    }
-	
-	/**
-	 * Creates the desired number of mines within the playing field.
-	 */
-    private void initializeField(){
-		for(int i = 0; i < numRows * numCols; i++){
-			Cell tmpCell = new Cell();
-			tmpCell.setIndex(i);
-			tmpCell.addMouseListener(this);
-			mineCells.add(tmpCell);
-			gamePanel.add(tmpCell);
-		}
-		for(int i = 0; i < numMines; i++){
-			minefield.add('m');
-		}
-		for(int i = 0; i < numRows * numCols; i++){
-			minefield.add('0');
-		}
-		Collections.shuffle(minefield);
 
-		for(int i = 0; i < numRows * numCols;  i++){
-			cellStates.add('b');
-		}
-	}
-	
-	/**
-	 * Checks if the Cell related to this index number contains a mine.
-	 * @param index the index number of the Cell to check.
-	 * @return A boolean indicating whether the Cell at the given index has a mine or not.
-	 */
-    private int isMine(int index){
-		try{
-			if(minefield.get(index)=='m'){
-				return 1;
-			}
-		}catch(IndexOutOfBoundsException ignored){}
-		
-		return 0;
-	}
-	
-	/**
-	 * Determines the number of adjacent mines for every cell. Marks info.
-	 */
-    private void calculateAdjacencies(){
-		for(int i = 0; i < numRows * numCols; i++){
-			int count = 0;
-			if(minefield.get(i) == 'm'){
-				continue;
-			}
-			if(i%24 == 0){//on left edge
-				count += isMine(i-24);
-				count += isMine(i-23);
-				count += isMine(i+1);
-				count += isMine(i+24);
-				count += isMine(i+25);
-			}
-			else if ((i+1)%23 == 0){//on right edge
-				count += isMine(i-25);
-				count += isMine(i-24);
-				count += isMine(i-1);
-				count += isMine(i+23);
-				count += isMine(i+24);
-			}
-			else {
-				count += isMine(i-25);
-				count += isMine(i-24);
-				count += isMine(i-23);
-				count += isMine(i-1);
-				count += isMine(i+1);
-				count += isMine(i+23);
-				count += isMine(i+24);
-				count += isMine(i+25);
-			}
-			minefield.set(i, Integer.toString(count).charAt(0));
-		}
-	}
-	/**
-	 * Makes many cells reveal themselves if the player clicks on one that has no adjacent mines.
-     * @param index the unique index of the Cell to examine.
-     */
-    private void caseZero(int index, List<Boolean> visits){
-		if(index == 0){
-			sweepCell(mineCells.get(index+1), visits);
-			sweepCell(mineCells.get(index+24), visits);
-			sweepCell(mineCells.get(index+25), visits);
-		}
-		else if (index == 23){
-			sweepCell(mineCells.get(index-1), visits);
-			sweepCell(mineCells.get(index+23), visits);
-			sweepCell(mineCells.get(index+24), visits);
-		}
-		else if(index < 24){
-			sweepCell(mineCells.get(index-1), visits);
-			sweepCell(mineCells.get(index+1), visits);
-			sweepCell(mineCells.get(index+23), visits);
-			sweepCell(mineCells.get(index+24), visits);
-			sweepCell(mineCells.get(index+25), visits);
-		}
-		else if (index == numRows * numCols){
-			sweepCell(mineCells.get(index-25), visits);
-			sweepCell(mineCells.get(index-24), visits);
-			sweepCell(mineCells.get(index-1), visits);
-		}
-		else if (index ==552){
-			sweepCell(mineCells.get(index-24), visits);
-			sweepCell(mineCells.get(index-23), visits);
-			sweepCell(mineCells.get(index+1), visits);
-		}
-		else if(index >552){
-			sweepCell(mineCells.get(index-25), visits);
-			sweepCell(mineCells.get(index-24), visits);
-			sweepCell(mineCells.get(index-23), visits);
-			sweepCell(mineCells.get(index-1), visits);
-			sweepCell(mineCells.get(index+1), visits);
-		}
-		else if(index%24 == 0){//on left edge
-			sweepCell(mineCells.get(index-24), visits);
-			sweepCell(mineCells.get(index-23), visits);
-			sweepCell(mineCells.get(index+1), visits);
-			sweepCell(mineCells.get(index+24), visits);
-			sweepCell(mineCells.get(index+25), visits);
-		}
-		else if ((index+1)%23 == 0){//on right edge
-			sweepCell(mineCells.get(index-25), visits);
-			sweepCell(mineCells.get(index-24), visits);
-			sweepCell(mineCells.get(index-1), visits);
-			sweepCell(mineCells.get(index+23), visits);
-			sweepCell(mineCells.get(index+24), visits);
-		}
-		else {
-			sweepCell(mineCells.get(index-25), visits);
-			sweepCell(mineCells.get(index-24), visits);
-			sweepCell(mineCells.get(index-23), visits);
-			sweepCell(mineCells.get(index-1), visits);
-			sweepCell(mineCells.get(index+1), visits);
-			sweepCell(mineCells.get(index+23), visits);
-			sweepCell(mineCells.get(index+24), visits);
-			sweepCell(mineCells.get(index+25), visits);
-		}
-	}
 
-	/**
-	 * Starts sweep of cells.
-	 * @param theCell The Cell object to begin a sweep on.
-	 */
-    private void startSweep(Cell theCell){
-		int index = theCell.getIndex();
-		List<Boolean> visits = new ArrayList<>();;
-		for(int i = 0; i < numRows * numCols; i++){
-			visits.add(false);
-		}
-		sweepCell(theCell, visits);
-	}
-
-	/**
-	 * Makes the given Cell reveal its contents. This is called when the player clicks on a Cell.
-	 * @param theCell the Cell to reveal.
-	 */
-    private void sweepCell(Cell theCell, List<Boolean> visits){
-		int index = theCell.getIndex();
-		if(visits.get(theCell.getIndex())){
-			return;
-		}
-		visits.set(index, true);
-		if(theCell.isEnabled()){
-			switch (minefield.get(index)){
-			case 'm':
-				GameOver();
-				break;
-			case '0':
-				caseZero(index, visits);
-				theCell.setEnabled(false);
-				theCell.setBackground(theCell.getBackground().darker());
-				break;
-            case '1':
-            	theCell.setEnabled(false);
-            	theCell.setIcon(oneIcon);
-            	theCell.setBackground(theCell.getBackground().darker());
-            	break;
-            case '2':
-            	theCell.setEnabled(false);
-            	theCell.setIcon(twoIcon);
-            	theCell.setBackground(theCell.getBackground().darker());
-            	break;
-            case '3':
-            	theCell.setEnabled(false);
-            	theCell.setIcon(threeIcon);
-            	theCell.setBackground(theCell.getBackground().darker());
-            	break;
-            case '4':
-            	theCell.setEnabled(false);
-            	theCell.setIcon(fourIcon);
-            	theCell.setBackground(theCell.getBackground().darker());
-            	break;
-            case '5':
-            	theCell.setEnabled(false);
-            	theCell.setIcon(fiveIcon);
-            	theCell.setBackground(theCell.getBackground().darker());
-            	break;
-            case '6':
-            	theCell.setEnabled(false);
-            	theCell.setIcon(sixIcon);
-            	theCell.setBackground(theCell.getBackground().darker());
-            	break;
-            case '7':
-            	theCell.setEnabled(false);
-            	theCell.setIcon(sevenIcon);
-            	theCell.setBackground(theCell.getBackground().darker());
-            	break;
-            case '8':
-            	theCell.setEnabled(false);
-            	theCell.setIcon(eightIcon);
-            	theCell.setBackground(theCell.getBackground().darker());
-            	break;
-			}
-		}
-	}
-
-	/**
-	 * Initializes view components.
-	 */
-    private void InitGraphics(){
-		scorePanel = new ScorePanel(this);
-		gamePanel = new JPanel();
-		this.setIconImage(mineIcon.getImage());
-		this.setTitle("minesweeperish");
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		JPanel pane = (JPanel)this.getContentPane();
-		this.setSize(500, 500);
-		pane.setLayout(new BorderLayout());
-		pane.add(scorePanel, BorderLayout.NORTH);
-		pane.add(gamePanel);
-		gamePanel.setLayout(new GridLayout(numRows,numCols));
-		scorePanel.setMines(numMines);
-	}
 
 	/**
 	 * Starts the game timer.
@@ -361,157 +468,4 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	public void startGame(){
 		timer.start();
 	}
-
-	/**
-	 * Starts a new game, resetting values. This is called when the player clicks on the start button.
-	 */
-    private void newGame(){
-		time = 0;
-		timer.stop();
-		for(int i = 0; i < numRows * numCols; i++){
-			gamePanel.remove(0);
-			mineCells.remove(0);
-			cellStates.set(i,'b');
-		}
-		for(int i = 0; i < numRows * numCols; i++){
-			Cell tmpCell = new Cell();
-			tmpCell.setIndex(i);
-			tmpCell.addMouseListener(this);
-			mineCells.add(tmpCell);
-			gamePanel.add(tmpCell);
-		}
-		Collections.shuffle(minefield);
-		calculateAdjacencies();
-		update(getGraphics());
-	}
-
-	/**
-	 * Checks whether the player has won each time they press a cell.
-	 */
-    private void flagCheck(){
-		int minesRight = 0;
-		for(int i = 0; i < numRows * numCols; i++){
-			if(minefield.get(i) == 'm' && cellStates.get(i) == 'f'){
-				minesRight++;
-			}
-		}
-		if(minesRight == numMines){
-			win = true;
-			GameOver();
-		}
-	}
-
-	/**
-	 * Displays final messages, shows mine locations.
-	 */
-    private void GameOver(){
-		timer.stop();
-		for(int i = 0; i < numRows * numCols; i++){
-			mineCells.get(i).setEnabled(false);
-			if(minefield.get(i)=='m'){
-				if(cellStates.get(i) == '?'){
-					mineCells.get(i).setBackground(Color.YELLOW);
-					mineCells.get(i).setIcon(mineIcon);
-				}
-				else if(cellStates.get(i) == 'b'){
-					mineCells.get(i).setBackground(Color.RED);
-					mineCells.get(i).setIcon(mineIcon);
-				}
-				else{
-					mineCells.get(i).setBackground(Color.GREEN);
-					mineCells.get(i).setIcon(mineIcon);
-				}
-			}
-		}
-		if(win){
-			JOptionPane.showMessageDialog(null,"End! Your time was " + time + " seconds.");
-		}
-		else{
-			JOptionPane.showMessageDialog(null,"End!");
-		}
-	}
-
-	/**
-	 * Main, simply creates a thread for the game and instantiates a MainGame object which handles everything.
-	 * @param args command line arguments.
-	 */
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable(){
-			@Override
-			public void run() {
-				new MainGame(24,24,100);
-			}});
-	}
-
-	/**
-	 * Handles mouse events.
-	 * @param arg0 The name of the MousEvent being handled...?
-	 */
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		Object source = arg0.getSource();
-		if(source instanceof Cell){
-			if(SwingUtilities.isLeftMouseButton(arg0)){
-				timer.start();
-				int id = ((Cell)source).getIndex();
-				if(cellStates.get(id)!='f'){
-					startSweep((Cell)source);
-				}
-			}
-			
-			else if(SwingUtilities.isRightMouseButton(arg0)){
-				int id = ((Cell)source).getIndex();
-				if(((Cell) source).isEnabled()){
-					if(cellStates.get(id)=='b'){
-						cellStates.set(id, 'f');
-						((Cell)source).setImage(flagIcon);
-						minesMarked++;
-						scorePanel.setMines(numMines-minesMarked);
-					}
-					else if(cellStates.get(id)=='f'){
-						cellStates.set(id,'?');
-						((Cell)source).setImage(questionIcon);
-						minesMarked--;
-						scorePanel.setMines(numMines-minesMarked);
-					}
-					else if(cellStates.get(id)=='?'){
-						cellStates.set(id,'b');
-						((Cell)source).setImage(null);
-					}
-				}
-				
-			}
-		}
-		flagCheck();
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {}
-
-	@Override
-	public void mouseExited(MouseEvent e) {}
-
-	@Override
-	public void mousePressed(MouseEvent e) {}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {}
-
-	/**
-	 * Handles generic action events. Primarily used to update game timer.
-	 * @param arg0 The name of the ActionEvent being handled.
-	 */
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		Object source = arg0.getSource();
-		if(source!= timer){
-			newGame();
-		}
-		if(source == timer){
-			time++;
-			scorePanel.setTime(time);
-		}
-		
-	}
-
 }
