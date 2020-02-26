@@ -16,8 +16,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+
+import Model.Model;
 import view.Cell;
 import view.ScorePanel;
+import Model.ArrayListModel;
 
 /**
  * The MainGame class is only instantiated once. This MainGame object runs and controls everything.
@@ -37,6 +40,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
     private ArrayList<Cell>mineCells;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
+	private Model gameData;
     //endregion
 
     //region Model
@@ -46,6 +50,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
      * @return A boolean indicating whether the Cell at the given index has a mine or not.
      */
     private int isMine(int index){
+        //TODO all usages of this function are in CalculateAdjacencies. Replace them with Model calls.
         try{
             if(minefield.get(index)=='m'){
                 return 1;
@@ -59,6 +64,8 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
      * Determines the number of adjacent mines for every cell. Marks info.
      */
     private void calculateAdjacencies(){
+        //region old
+        //TODO This can be entirely replaced by calls to the Model.
         for(int i = 0; i < numRows * numCols; i++){
             int count = 0;
             if(minefield.get(i) == 'm'){
@@ -71,6 +78,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
                 count += isMine(i+24);
                 count += isMine(i+25);
             }
+            //TODO this should be %24.
             else if ((i+1)%23 == 0){//on right edge
                 count += isMine(i-25);
                 count += isMine(i-24);
@@ -90,6 +98,17 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
             }
             minefield.set(i, Integer.toString(count).charAt(0));
         }
+        //endregion
+        //TODO The adjacencies do not match. We have incompletely changed to the Model object.
+        /*for (int curIndex = 0; curIndex < gameData.GetNumRows()*gameData.GetNumCols(); curIndex++){
+            if(minefield.get(curIndex) == 'm'){
+                continue;
+            }
+            int row = ConvertIndexToCoordinates(curIndex, gameData.GetNumRows(), gameData.GetNumCols())[0];
+            int column = ConvertIndexToCoordinates(curIndex, gameData.GetNumRows(), gameData.GetNumCols())[1];
+            char numAdjacentAsChar = Integer.toString(gameData.GetNumAdjacent(row,column)).charAt(0);
+            minefield.set(curIndex, numAdjacentAsChar);
+        }*/
     }
     //endregion
 
@@ -166,6 +185,10 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
         Object source = arg0.getSource();
         if(source instanceof Cell){
             if(SwingUtilities.isLeftMouseButton(arg0)){
+                System.out.println("Clicked index " + ((Cell)source).getIndex() +".");
+                int row = ConvertIndexToCoordinates(((Cell)source).getIndex(), gameData.GetNumRows(), gameData.GetNumCols())[0];
+                int column = ConvertIndexToCoordinates(((Cell)source).getIndex(), gameData.GetNumRows(), gameData.GetNumCols())[1];
+                System.out.println(gameData.GetNumAdjacent(row,column) + " adjacent.");
                 timer.start();
                 int id = ((Cell)source).getIndex();
                 if(cellStates.get(id)!='f'){
@@ -241,6 +264,7 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
         minefield = new ArrayList<>();
         cellStates = new ArrayList<>();
         mineCells = new ArrayList<>();
+        this.gameData = new ArrayListModel();
         InitGraphics();
         initializeField();
         calculateAdjacencies();
@@ -249,10 +273,12 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
     }
 
     /**
-     * Creates the desired number of mines within the playing field.
+     * Creates a minefield with the desired number of mines.
      */
     private void initializeField(){
-        for(int i = 0; i < numRows * numCols; i++){
+        //region old
+        //TODO The inaccurate adjacencies are because we have two versions of the data structure, and are using bits of both.
+        /*for(int i = 0; i < numRows * numCols; i++){
             Cell tmpCell = new Cell();
             tmpCell.setIndex(i);
             tmpCell.addMouseListener(this);
@@ -269,7 +295,72 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 
         for(int i = 0; i < numRows * numCols;  i++){
             cellStates.add('b');
+        }*/
+        //endregion
+        gameData.CreateMinefield(numRows, numCols);
+        PlantMines(gameData,numMines);
+        //TODO this is the perfect Model refactor! We use the new model to fill the old one. Then we replace use cases one at a time.
+        //The game remains fully functional the whole time.
+        //First, initialize the 1D data structure with empty values, and place Cells in GUI.
+        for (int curIndex = 0; curIndex < numRows*numCols; curIndex++){
+            minefield.add('0');
+            cellStates.add('b');
+            Cell tmpCell = new Cell();
+            tmpCell.setIndex(curIndex);
+            tmpCell.addMouseListener(this);
+            mineCells.add(tmpCell);
+            gamePanel.add(tmpCell);
         }
+
+        //Now fill minefield model from the ArrayListModel.
+        for (int curCol = 0; curCol < numCols; curCol++){
+            for (int curRow = 0; curRow < numRows; curRow++){
+                int curIndex = ConvertCoordinatesToIndex(new int[]{curRow,curCol});
+                if(gameData.IsMine(curRow,curCol)){
+                    minefield.set(curIndex,'m');
+                }
+            }
+        }
+    }
+
+    /**
+     * Plants the desired number of mines randomly within the given minefield.
+     * @param gameData The Model containing the minefield.
+     * @param numMines The number of mines to place.
+     */
+    private void PlantMines(Model gameData, int numMines){
+        ArrayList<Boolean> listToShuffle = new ArrayList<>();
+        for (int i = 0; i < gameData.GetNumRows()*gameData.GetNumCols(); i++){
+            boolean cellValue = i < numMines;
+            listToShuffle.add(cellValue);
+        }
+        Collections.shuffle(listToShuffle);
+        for (int curIndex = 0; curIndex < gameData.GetNumRows()*gameData.GetNumCols(); curIndex++){
+            System.out.println("Index " + curIndex + ".");
+            if (listToShuffle.get(curIndex) == true){
+                int row = ConvertIndexToCoordinates(curIndex, numRows,numCols)[0];
+                int column = ConvertIndexToCoordinates(curIndex, numRows,numCols)[1];
+                gameData.AddMine(row,column);
+                System.out.println("Index " + curIndex + " places mine at row " + row + ", column " + column + ".");
+            }
+        }
+    }
+
+    /**
+     * Converts a 1D index into 2D coordinates for a minefield of the given dimensions.
+     * @param index The 1D index to convert.
+     * @param numRows The number of rows in the 2D minefield.
+     * @param numCols The number of columns in the 2D minefield.
+     * @return An array containing the vertical and horizontal coordinates the 1D index corresponds to.
+     */
+    private int[] ConvertIndexToCoordinates(int index, int numRows, int numCols){
+        int row = index / numRows;
+        int column = index % numCols;
+        return new int[] {row, column};
+    }
+
+    private int ConvertCoordinatesToIndex(int[] coordinates){
+        return coordinates[0]*coordinates[1];
     }
 
     /**
@@ -342,7 +433,6 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
      * @param theCell The Cell object to begin a sweep on.
      */
     private void startSweep(Cell theCell){
-        int index = theCell.getIndex();
         List<Boolean> visits = new ArrayList<>();
         for(int i = 0; i < numRows * numCols; i++){
             visits.add(false);

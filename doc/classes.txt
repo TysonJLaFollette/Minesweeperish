@@ -41,7 +41,7 @@ end note
 
 Presenter .. PresenterNote
 
-class Model {
+class Model.Model {
     - mineLocations: List<List<Boolean>>
     - flagLocations: List<List<Boolean>>
     - sweptLocations: List<List<Boolean>>
@@ -63,14 +63,14 @@ note as ModelNote
     Presenter to store data.
 end note
 
-Model .. ModelNote
+Model.Model .. ModelNote
 
 Game *-- Presenter : Runs game logic using
 
 View --* Presenter
 View -> Presenter : Links events to functions in
 View <- Presenter : Tells what to display.
-Presenter *-- Model
-Presenter -> Model : Applies game logic to state of
-Model -> Presenter : Gives data to
+Presenter *-- Model.Model
+Presenter -> Model.Model : Applies game logic to state of
+Model.Model -> Presenter : Gives data to
 @enduml

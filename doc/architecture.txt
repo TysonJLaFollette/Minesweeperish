@@ -33,12 +33,12 @@ package "Presenter" {
 PresenterNote . Presenter
 
 note as ModelNote
-    The Model contains the game's state.
+    The Model.Model contains the game's state.
     Has several 2D Lists, with interaction functions.
     Functions are abstracted, not revealing their inner workings to Presenter.
 end note
 
-package "Model" {
+package "Model.Model" {
     () ModelInterface
     [UserActionFunctions] <--> ModelInterface
     ModelInterface -- [MineLocations]
@@ -47,5 +47,5 @@ package "Model" {
     ModelInterface -- [AdjacencyCounts]
 }
 
-ModelNote . Model
+ModelNote . Model.Model
 @enduml
