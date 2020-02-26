@@ -66,48 +66,45 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
     private void calculateAdjacencies(){
         //region old
         //TODO This can be entirely replaced by calls to the Model.
-        for(int i = 0; i < numRows * numCols; i++){
+        for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
             int count = 0;
-            if(minefield.get(i) == 'm'){
-                continue;
-            }
-            if(i%24 == 0){//on left edge
-                count += isMine(i-24);
-                count += isMine(i-23);
-                count += isMine(i+1);
-                count += isMine(i+24);
-                count += isMine(i+25);
-            }
-            //TODO this should be %24.
-            else if ((i+1)%23 == 0){//on right edge
-                count += isMine(i-25);
-                count += isMine(i-24);
-                count += isMine(i-1);
-                count += isMine(i+23);
-                count += isMine(i+24);
-            }
-            else {
-                count += isMine(i-25);
-                count += isMine(i-24);
-                count += isMine(i-23);
-                count += isMine(i-1);
-                count += isMine(i+1);
-                count += isMine(i+23);
-                count += isMine(i+24);
-                count += isMine(i+25);
-            }
-            minefield.set(i, Integer.toString(count).charAt(0));
-        }
-        //endregion
-        //TODO The adjacencies do not match. We have incompletely changed to the Model object.
-        /*for (int curIndex = 0; curIndex < gameData.GetNumRows()*gameData.GetNumCols(); curIndex++){
             if(minefield.get(curIndex) == 'm'){
                 continue;
             }
-            int row = ConvertIndexToCoordinates(curIndex, gameData.GetNumRows(), gameData.GetNumCols())[0];
-            int column = ConvertIndexToCoordinates(curIndex, gameData.GetNumRows(), gameData.GetNumCols())[1];
-            char numAdjacentAsChar = Integer.toString(gameData.GetNumAdjacent(row,column)).charAt(0);
-            minefield.set(curIndex, numAdjacentAsChar);
+            if(curIndex%24 == 0){//on left edge
+                count += isMine(curIndex-24);
+                count += isMine(curIndex-23);
+                count += isMine(curIndex+1);
+                count += isMine(curIndex+24);
+                count += isMine(curIndex+25);
+            }
+            else if ((curIndex+1)%24 == 0){//on right edge
+                count += isMine(curIndex-25);
+                count += isMine(curIndex-24);
+                count += isMine(curIndex-1);
+                count += isMine(curIndex+23);
+                count += isMine(curIndex+24);
+            }
+            else {
+                count += isMine(curIndex-25);
+                count += isMine(curIndex-24);
+                count += isMine(curIndex-23);
+                count += isMine(curIndex-1);
+                count += isMine(curIndex+1);
+                count += isMine(curIndex+23);
+                count += isMine(curIndex+24);
+                count += isMine(curIndex+25);
+            }
+            minefield.set(curIndex, Integer.toString(count).charAt(0));
+        }
+        //endregion
+        //TODO The adjacencies do not match. We have incompletely changed to the Model object.
+        /*for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
+            for(int curRow = 0; curRow < gameData.GetNumRows();curRow++){
+                if (gameData.IsMine(curRow,curCol)){ continue; }
+                char numAdjacentAsChar = Integer.toString(gameData.GetNumAdjacent(curRow,curCol)).charAt(0);
+                minefield.set(ConvertCoordinatesToIndex(new int[]{curRow,curCol}), numAdjacentAsChar);
+            }
         }*/
     }
     //endregion
@@ -315,8 +312,8 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
         //Now fill minefield model from the ArrayListModel.
         for (int curCol = 0; curCol < numCols; curCol++){
             for (int curRow = 0; curRow < numRows; curRow++){
-                int curIndex = ConvertCoordinatesToIndex(new int[]{curRow,curCol});
-                if(gameData.IsMine(curRow,curCol)){
+                int curIndex = ConvertCoordinatesToIndex(new int[]{curCol,curRow});
+                if(gameData.IsMine(curCol,curRow)){
                     minefield.set(curIndex,'m');
                 }
             }
@@ -338,10 +335,10 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
         for (int curIndex = 0; curIndex < gameData.GetNumRows()*gameData.GetNumCols(); curIndex++){
             System.out.println("Index " + curIndex + ".");
             if (listToShuffle.get(curIndex) == true){
-                int row = ConvertIndexToCoordinates(curIndex, numRows,numCols)[0];
-                int column = ConvertIndexToCoordinates(curIndex, numRows,numCols)[1];
-                gameData.AddMine(row,column);
-                System.out.println("Index " + curIndex + " places mine at row " + row + ", column " + column + ".");
+                int row = ConvertIndexToCoordinates(curIndex, numCols,numRows)[1];
+                int column = ConvertIndexToCoordinates(curIndex, numCols,numRows)[0];
+                gameData.AddMine(column,row);
+                System.out.println("Index " + curIndex + " places mine at column " + column + ", row " + row + ".");
             }
         }
     }
@@ -353,10 +350,10 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
      * @param numCols The number of columns in the 2D minefield.
      * @return An array containing the vertical and horizontal coordinates the 1D index corresponds to.
      */
-    private int[] ConvertIndexToCoordinates(int index, int numRows, int numCols){
+    private int[] ConvertIndexToCoordinates(int index, int numCols, int numRows){
         int row = index / numRows;
         int column = index % numCols;
-        return new int[] {row, column};
+        return new int[] {column, row};
     }
 
     private int ConvertCoordinatesToIndex(int[] coordinates){
