@@ -1,4 +1,4 @@
-import data.MainGame;
+import data.Presenter;
 
 import javax.swing.*;
 
@@ -8,6 +8,6 @@ public class Game {
      * @param args command line arguments.
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new MainGame(24,24,100));
+        SwingUtilities.invokeLater(() -> new Presenter(24,24,100));
     }
 }

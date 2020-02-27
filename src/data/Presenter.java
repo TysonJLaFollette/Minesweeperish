@@ -27,8 +27,9 @@ import Model.ArrayListModel;
  * It is a JFrame, and listens for the mouse and actions. It is the game window.
  * @author Tyson J LaFollette
  */
-public class MainGame extends JFrame implements MouseListener, ActionListener{
+public class Presenter extends JFrame implements MouseListener, ActionListener{
     //region Properties
+    //TODO Possibly first. For numRows, numCols, numMines, use the ArrayListModel.
     private int numRows;
     private int numCols;
     private int numMines;
@@ -41,6 +42,24 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
 	private Model gameData;
+    //endregion
+
+    //region Constructors
+    public Presenter(int numRows, int numCols, int numMines){
+        this.numRows = numRows;
+        this.numCols = numCols;
+        this.numMines = numMines;
+        win = false;
+        minefield = new ArrayList<>();
+        cellStates = new ArrayList<>();
+        mineCells = new ArrayList<>();
+        this.gameData = new ArrayListModel();
+        InitGraphics();
+        initializeField();
+        calculateAdjacencies();
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+    }
     //endregion
 
     //region Model
@@ -141,6 +160,13 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
         pane.add(gamePanel);
         gamePanel.setLayout(new GridLayout(numRows,numCols));
         scorePanel.setMines(numMines);
+        for (int curIndex = 0; curIndex < numCols*numRows; curIndex++){
+            Cell tmpCell = new Cell();
+            tmpCell.setIndex(curIndex);
+            tmpCell.addMouseListener(this);
+            mineCells.add(tmpCell);
+            gamePanel.add(tmpCell);
+        }
     }
 
     /**
@@ -250,63 +276,20 @@ public class MainGame extends JFrame implements MouseListener, ActionListener{
     //endregion
 
     //region Presenter
-    /**
-     * Constructor. The program begins with this.
-     */
-    public MainGame(int numRows, int numCols, int numMines){
-        this.numRows = numRows;
-        this.numCols = numCols;
-        this.numMines = numMines;
-        win = false;
-        minefield = new ArrayList<>();
-        cellStates = new ArrayList<>();
-        mineCells = new ArrayList<>();
-        this.gameData = new ArrayListModel();
-        InitGraphics();
-        initializeField();
-        calculateAdjacencies();
-        this.setLocationRelativeTo(null);
-        this.setVisible(true);
-    }
+
 
     /**
      * Creates a minefield with the desired number of mines.
      */
     private void initializeField(){
-        //region old
-        //TODO The inaccurate adjacencies are because we have two versions of the data structure, and are using bits of both.
-        /*for(int i = 0; i < numRows * numCols; i++){
-            Cell tmpCell = new Cell();
-            tmpCell.setIndex(i);
-            tmpCell.addMouseListener(this);
-            mineCells.add(tmpCell);
-            gamePanel.add(tmpCell);
-        }
-        for(int i = 0; i < numMines; i++){
-            minefield.add('m');
-        }
-        for(int i = 0; i < numRows * numCols; i++){
-            minefield.add('0');
-        }
-        Collections.shuffle(minefield);
-
-        for(int i = 0; i < numRows * numCols;  i++){
-            cellStates.add('b');
-        }*/
-        //endregion
         gameData.CreateMinefield(numRows, numCols);
         PlantMines(gameData,numMines);
         //TODO this is the perfect Model refactor! We use the new model to fill the old one. Then we replace use cases one at a time.
         //The game remains fully functional the whole time.
-        //First, initialize the 1D data structure with empty values, and place Cells in GUI.
+        //First, initialize the 1D data structure with empty values.
         for (int curIndex = 0; curIndex < numRows*numCols; curIndex++){
             minefield.add('0');
             cellStates.add('b');
-            Cell tmpCell = new Cell();
-            tmpCell.setIndex(curIndex);
-            tmpCell.addMouseListener(this);
-            mineCells.add(tmpCell);
-            gamePanel.add(tmpCell);
         }
 
         //Now fill minefield model from the ArrayListModel.
