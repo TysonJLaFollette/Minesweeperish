@@ -54,8 +54,8 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         cellStates = new ArrayList<>();
         mineCells = new ArrayList<>();
         this.gameData = new ArrayListModel();
-        InitGraphics();
         initializeField();
+        InitGraphics();
         calculateAdjacencies();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -83,6 +83,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      * Determines the number of adjacent mines for every cell. Marks info.
      */
     private void calculateAdjacencies(){
+        System.out.println("Calculating adjacencies in 1D.");
         //region old
         //TODO This can be entirely replaced by calls to the Model.
         for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
@@ -116,6 +117,25 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
             }
             minefield.set(curIndex, Integer.toString(count).charAt(0));
         }
+        System.out.println("Adjacencies according to 1D:");
+        for (int curRow = 0; curRow < numRows; curRow++){
+            for (int curCol = 0; curCol < numCols; curCol++){
+                System.out.print(minefield.get(curRow*numCols+curCol));
+            }
+            System.out.println("");
+        }
+        System.out.println("\nAdjacencies according to ArrayListModel:");
+        for (int curRow = 0; curRow < numRows; curRow++){
+            String row = "";
+            for (int curCol = 0; curCol < numCols; curCol++){
+                if (gameData.IsMine(curCol,curRow)){
+                    row += "m";
+                } else {
+                    row += gameData.GetNumAdjacent(curCol,curRow);
+                }
+            }
+            System.out.println(row);
+        }
         //endregion
         //TODO The adjacencies do not match. We have incompletely changed to the Model object.
         /*for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
@@ -148,6 +168,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      * Initializes view components.
      */
     private void InitGraphics(){
+        System.out.println("Initializing graphics.");
         scorePanel = new ScorePanel(this);
         gamePanel = new JPanel();
         this.setIconImage(mineIcon.getImage());
@@ -282,8 +303,20 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      * Creates a minefield with the desired number of mines.
      */
     private void initializeField(){
+        System.out.println("Initializing field.");
         gameData.CreateMinefield(numRows, numCols);
         PlantMines(gameData,numMines);
+        System.out.println("Mines according to ArrayListModel:");
+        for (int curRow = 0; curRow < numRows; curRow++){
+            for (int curCol = 0; curCol < numCols; curCol++){
+                if (gameData.IsMine(curCol,curRow)){
+                    System.out.print("m");
+                }else{
+                    System.out.print("0");
+                }
+            }
+            System.out.println("");
+        }
         //TODO this is the perfect Model refactor! We use the new model to fill the old one. Then we replace use cases one at a time.
         //The game remains fully functional the whole time.
         //First, initialize the 1D data structure with empty values.
@@ -300,6 +333,17 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
                     minefield.set(curIndex,'m');
                 }
             }
+        }
+        System.out.println("\nMines according to 1D:");
+        for (int curRow = 0; curRow < numRows; curRow++){
+            for (int curCol = 0; curCol < numCols; curCol++){
+                if (minefield.get(curRow*24+curCol)=='m'){
+                    System.out.print("m");
+                }else{
+                    System.out.print("0");
+                }
+            }
+            System.out.println("");
         }
     }
 
@@ -340,7 +384,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
     }
 
     private int ConvertCoordinatesToIndex(int[] coordinates){
-        return coordinates[0]*coordinates[1];
+        return coordinates[1]*numCols + coordinates[0];
     }
 
     /**
@@ -348,6 +392,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      * @param index the unique index of the Cell to examine.
      */
     private void caseZero(int index, List<Boolean> visits){
+        //TODO refactor this hideous thing. These cases are not mutually exclusive.
         if(index == 0){
             sweepCell(mineCells.get(index+1), visits);
             sweepCell(mineCells.get(index+24), visits);
