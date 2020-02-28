@@ -56,95 +56,28 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         this.gameData = new ArrayListModel();
         initializeField();
         InitGraphics();
-        calculateAdjacencies();
+        calculate1DAdjacencies();
         this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
     //endregion
 
     //region Model
-    /**
-     * Checks if the Cell related to this index number contains a mine.
-     * @param index the index number of the Cell to check.
-     * @return A boolean indicating whether the Cell at the given index has a mine or not.
-     */
-    private int isMine(int index){
-        //TODO all usages of this function are in CalculateAdjacencies. Replace them with Model calls.
-        try{
-            if(minefield.get(index)=='m'){
-                return 1;
-            }
-        }catch(IndexOutOfBoundsException ignored){}
-
-        return 0;
-    }
 
     /**
-     * Determines the number of adjacent mines for every cell. Marks info.
+     * Loads adjacencies and mines from ArrayListModel into 1D minefield.
      */
-    private void calculateAdjacencies(){
-        System.out.println("Calculating adjacencies in 1D.");
-        //region old
-        //TODO This can be entirely replaced by calls to the Model.
-        for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
-            int count = 0;
-            if(minefield.get(curIndex) == 'm'){
-                continue;
-            }
-            if(curIndex%24 == 0){//on left edge
-                count += isMine(curIndex-24);
-                count += isMine(curIndex-23);
-                count += isMine(curIndex+1);
-                count += isMine(curIndex+24);
-                count += isMine(curIndex+25);
-            }
-            else if ((curIndex+1)%24 == 0){//on right edge
-                count += isMine(curIndex-25);
-                count += isMine(curIndex-24);
-                count += isMine(curIndex-1);
-                count += isMine(curIndex+23);
-                count += isMine(curIndex+24);
-            }
-            else {
-                count += isMine(curIndex-25);
-                count += isMine(curIndex-24);
-                count += isMine(curIndex-23);
-                count += isMine(curIndex-1);
-                count += isMine(curIndex+1);
-                count += isMine(curIndex+23);
-                count += isMine(curIndex+24);
-                count += isMine(curIndex+25);
-            }
-            minefield.set(curIndex, Integer.toString(count).charAt(0));
-        }
-        System.out.println("Adjacencies according to 1D:");
-        for (int curRow = 0; curRow < numRows; curRow++){
-            for (int curCol = 0; curCol < numCols; curCol++){
-                System.out.print(minefield.get(curRow*numCols+curCol));
-            }
-            System.out.println("");
-        }
-        System.out.println("\nAdjacencies according to ArrayListModel:");
-        for (int curRow = 0; curRow < numRows; curRow++){
-            String row = "";
-            for (int curCol = 0; curCol < numCols; curCol++){
+    private void calculate1DAdjacencies(){
+        for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
+            for(int curRow = 0; curRow < gameData.GetNumRows();curRow++){
                 if (gameData.IsMine(curCol,curRow)){
-                    row += "m";
+                    minefield.set(ConvertCoordinatesToIndex(new int[]{curCol,curRow}),'m');
                 } else {
-                    row += gameData.GetNumAdjacent(curCol,curRow);
+                    char numAdjacentAsChar = Integer.toString(gameData.GetNumAdjacent(curCol,curRow)).charAt(0);
+                    minefield.set(ConvertCoordinatesToIndex(new int[]{curCol,curRow}), numAdjacentAsChar);
                 }
             }
-            System.out.println(row);
         }
-        //endregion
-        //TODO The adjacencies do not match. We have incompletely changed to the Model object.
-        /*for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
-            for(int curRow = 0; curRow < gameData.GetNumRows();curRow++){
-                if (gameData.IsMine(curRow,curCol)){ continue; }
-                char numAdjacentAsChar = Integer.toString(gameData.GetNumAdjacent(curRow,curCol)).charAt(0);
-                minefield.set(ConvertCoordinatesToIndex(new int[]{curRow,curCol}), numAdjacentAsChar);
-            }
-        }*/
     }
     //endregion
 
@@ -548,7 +481,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
             gamePanel.add(tmpCell);
         }
         Collections.shuffle(minefield);
-        calculateAdjacencies();
+        calculate1DAdjacencies();
         update(getGraphics());
     }
 
