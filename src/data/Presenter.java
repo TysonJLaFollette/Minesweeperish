@@ -128,20 +128,20 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      */
     private void GameOver(){
         timer.stop();
-        for(int i = 0; i < numRows * numCols; i++){
-            mineCells.get(i).setEnabled(false);
-            if(minefield.get(i)=='m'){
-                if(cellStates.get(i) == '?'){
-                    mineCells.get(i).setBackground(Color.YELLOW);
-                    mineCells.get(i).setIcon(mineIcon);
+        for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
+            mineCells.get(curIndex).setEnabled(false);
+            if(minefield.get(curIndex)=='m'){
+                if(cellStates.get(curIndex) == '?'){
+                    mineCells.get(curIndex).setBackground(Color.YELLOW);
+                    mineCells.get(curIndex).setIcon(mineIcon);
                 }
-                else if(cellStates.get(i) == 'b'){
-                    mineCells.get(i).setBackground(Color.RED);
-                    mineCells.get(i).setIcon(mineIcon);
+                else if(cellStates.get(curIndex) == 'b'){
+                    mineCells.get(curIndex).setBackground(Color.RED);
+                    mineCells.get(curIndex).setIcon(mineIcon);
                 }
                 else{
-                    mineCells.get(i).setBackground(Color.GREEN);
-                    mineCells.get(i).setIcon(mineIcon);
+                    mineCells.get(curIndex).setBackground(Color.GREEN);
+                    mineCells.get(curIndex).setIcon(mineIcon);
                 }
             }
         }
@@ -151,6 +151,14 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         else{
             JOptionPane.showMessageDialog(null,"End!");
         }
+        //TODO finish this new version.
+        /*for (int curCol = 0; curCol < numCols; curCol++){
+            for(int curRow = 0; curRow < numRows; curRow++){
+                int curIndex = ConvertCoordinatesToIndex(new int[]{curCol,curRow});
+                mineCells.get(curIndex).setEnabled(false);
+
+            }
+        }*/
     }
 
     /**
@@ -162,10 +170,8 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         Object source = arg0.getSource();
         if(source instanceof Cell){
             if(SwingUtilities.isLeftMouseButton(arg0)){
-                System.out.println("Clicked index " + ((Cell)source).getIndex() +".");
                 int row = ConvertIndexToCoordinates(((Cell)source).getIndex(), gameData.GetNumRows(), gameData.GetNumCols())[0];
                 int column = ConvertIndexToCoordinates(((Cell)source).getIndex(), gameData.GetNumRows(), gameData.GetNumCols())[1];
-                System.out.println(gameData.GetNumAdjacent(row,column) + " adjacent.");
                 timer.start();
                 int id = ((Cell)source).getIndex();
                 if(cellStates.get(id)!='f'){
@@ -293,12 +299,10 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         }
         Collections.shuffle(listToShuffle);
         for (int curIndex = 0; curIndex < gameData.GetNumRows()*gameData.GetNumCols(); curIndex++){
-            System.out.println("Index " + curIndex + ".");
             if (listToShuffle.get(curIndex) == true){
                 int row = ConvertIndexToCoordinates(curIndex, numCols,numRows)[1];
                 int column = ConvertIndexToCoordinates(curIndex, numCols,numRows)[0];
                 gameData.AddMine(column,row);
-                System.out.println("Index " + curIndex + " places mine at column " + column + ", row " + row + ".");
             }
         }
     }
@@ -404,60 +408,36 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      */
     private void sweepCell(Cell theCell, List<Boolean> visits){
         int index = theCell.getIndex();
-        if(visits.get(theCell.getIndex())){
+        int column = ConvertIndexToCoordinates(index, numCols,numRows)[0];
+        int row = ConvertIndexToCoordinates(index, numCols,numRows)[1];
+        int numAdjacent = gameData.GetNumAdjacent(column,row);
+        if(visits.get(index)){
             return;
         }
         visits.set(index, true);
         if(theCell.isEnabled()){
-            switch (minefield.get(index)){
-                case 'm':
-                    GameOver();
-                    break;
-                case '0':
-                    caseZero(index, visits);
-                    theCell.setEnabled(false);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
-                case '1':
-                    theCell.setEnabled(false);
-                    theCell.setIcon(oneIcon);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
-                case '2':
-                    theCell.setEnabled(false);
-                    theCell.setIcon(twoIcon);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
-                case '3':
-                    theCell.setEnabled(false);
-                    theCell.setIcon(threeIcon);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
-                case '4':
-                    theCell.setEnabled(false);
-                    theCell.setIcon(fourIcon);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
-                case '5':
-                    theCell.setEnabled(false);
-                    theCell.setIcon(fiveIcon);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
-                case '6':
-                    theCell.setEnabled(false);
-                    theCell.setIcon(sixIcon);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
-                case '7':
-                    theCell.setEnabled(false);
-                    theCell.setIcon(sevenIcon);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
-                case '8':
-                    theCell.setEnabled(false);
-                    theCell.setIcon(eightIcon);
-                    theCell.setBackground(theCell.getBackground().darker());
-                    break;
+            theCell.setEnabled(false);
+            theCell.setBackground(theCell.getBackground().darker());
+            if (gameData.IsMine(column,row)){
+                GameOver();
+            } else if (numAdjacent == 0) {
+                caseZero(index, visits);
+            } else if (numAdjacent == 1){
+                theCell.setIcon(oneIcon);
+            } else if (numAdjacent == 2){
+                theCell.setIcon(twoIcon);
+            } else if (numAdjacent == 3){
+                theCell.setIcon(threeIcon);
+            } else if (numAdjacent == 4){
+                theCell.setIcon(fourIcon);
+            } else if (numAdjacent == 5){
+                theCell.setIcon(fiveIcon);
+            } else if (numAdjacent == 6) {
+                theCell.setIcon(sixIcon);
+            } else if (numAdjacent == 7){
+                theCell.setIcon(sevenIcon);
+            } else if (numAdjacent == 8){
+                theCell.setIcon(eightIcon);
             }
         }
     }
