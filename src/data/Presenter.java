@@ -22,8 +22,6 @@ import view.Cell;
 import view.ScorePanel;
 import Model.ArrayListModel;
 
-
-//TODO update to use the new Model interface for all cell flagging.
 /**
  * The MainGame class is only instantiated once. This MainGame object runs and controls everything.
  * It is a JFrame, and listens for the mouse and actions. It is the game window.
@@ -53,15 +51,11 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         this.gameData = new ArrayListModel();
         InitializeField();
         InitGraphics();
-        this.setLocationRelativeTo(null);
+        //this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
     //endregion
 
-    //region Model
-    //endregion
-
-    //region View
     /**
      * Images for the various states of Cells.
      */
@@ -107,22 +101,21 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      */
     private void GameOver(){
         timer.stop();
-        for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
-            int column = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
-            int row = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
-            mineCells.get(curIndex).setEnabled(false);
-            if(gameData.IsMine(column,row)){
-                if(gameData.IsQuestion(column,row)){
-                    mineCells.get(curIndex).setBackground(Color.YELLOW);
-                    mineCells.get(curIndex).setIcon(mineIcon);
-                }
-                else if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
-                    mineCells.get(curIndex).setBackground(Color.RED);
-                    mineCells.get(curIndex).setIcon(mineIcon);
-                }
-                else if (gameData.IsFlag(column,row)){
-                    mineCells.get(curIndex).setBackground(Color.GREEN);
-                    mineCells.get(curIndex).setIcon(mineIcon);
+        for (int curCol = 0; curCol < numCols; curCol++){
+            for(int curRow = 0; curRow < numRows; curRow++){
+                int curIndex = ConvertCoordinatesToIndex(new int[]{curCol,curRow});
+                mineCells.get(curIndex).setEnabled(false);
+                if (gameData.IsMine(curCol,curRow)){
+                    if (gameData.IsFlag(curCol,curRow)){
+                        mineCells.get(curIndex).setBackground(Color.GREEN);
+                        mineCells.get(curIndex).setIcon(mineIcon);
+                    } else if (gameData.IsQuestion(curCol,curRow)){
+                        mineCells.get(curIndex).setBackground(Color.YELLOW);
+                        mineCells.get(curIndex).setIcon(mineIcon);
+                    } else {
+                        mineCells.get(curIndex).setBackground(Color.RED);
+                        mineCells.get(curIndex).setIcon(mineIcon);
+                    }
                 }
             }
         }
@@ -132,14 +125,6 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         else{
             JOptionPane.showMessageDialog(null,"End!");
         }
-        //TODO finish this new version.
-        /*for (int curCol = 0; curCol < numCols; curCol++){
-            for(int curRow = 0; curRow < numRows; curRow++){
-                int curIndex = ConvertCoordinatesToIndex(new int[]{curCol,curRow});
-                mineCells.get(curIndex).setEnabled(false);
-
-            }
-        }*/
     }
 
     /**
@@ -149,38 +134,36 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
     @Override
     public void mouseClicked(MouseEvent arg0) {
         Object source = arg0.getSource();
-        if(source instanceof Cell){
-            int clickedIndex = ((Cell)source).getIndex();
-            int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
-            int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
-            if(SwingUtilities.isLeftMouseButton(arg0)){
-                timer.start();
-                if(!gameData.IsFlag(column, row)){
-                    startSweep((Cell)source);
-                }
+        if (! (source instanceof Cell)){ return; }
+        Cell clickedCell = (Cell)source;
+        if (clickedCell.isEnabled() == false) { return; }
+        int clickedIndex = clickedCell.getIndex();
+        int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
+        int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
+        if(SwingUtilities.isLeftMouseButton(arg0)){
+            timer.start();
+            if(!gameData.IsFlag(column, row)){
+                startSweep(clickedCell);
             }
-
-            else if(SwingUtilities.isRightMouseButton(arg0)){
-                if(((Cell) source).isEnabled()){
-                    if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
-                        gameData.AddFlag(column,row);
-                        ((Cell)source).setImage(flagIcon);
-                        minesMarked++;
-                        scorePanel.setMines(numMines-minesMarked);
-                    }
-                    else if(gameData.IsFlag(column,row)){
-                        gameData.AddQuestionMark(column,row);
-                        gameData.RemoveFlag(column,row);
-                        ((Cell)source).setImage(questionIcon);
-                        minesMarked--;
-                        scorePanel.setMines(numMines-minesMarked);
-                    }
-                    else if(gameData.IsQuestion(column,row)){
-                        gameData.RemoveQuestionMark(column,row);
-                        ((Cell)source).setImage(null);
-                    }
+        } else if(SwingUtilities.isRightMouseButton(arg0)){
+            if(clickedCell.isEnabled()){
+                if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
+                    gameData.AddFlag(column,row);
+                    ((Cell)source).setImage(flagIcon);
+                    minesMarked++;
+                    scorePanel.setMines(numMines-minesMarked);
                 }
-
+                else if(gameData.IsFlag(column,row)){
+                    gameData.AddQuestionMark(column,row);
+                    gameData.RemoveFlag(column,row);
+                    ((Cell)source).setImage(questionIcon);
+                    minesMarked--;
+                    scorePanel.setMines(numMines-minesMarked);
+                }
+                else if(gameData.IsQuestion(column,row)){
+                    gameData.RemoveQuestionMark(column,row);
+                    ((Cell)source).setImage(null);
+                }
             }
         }
         flagCheck();
@@ -214,9 +197,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         }
 
     }
-    //endregion
 
-    //region Presenter
     /**
      * Creates a minefield with the desired number of mines.
      */
@@ -429,7 +410,6 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
             GameOver();
         }
     }
-    //endregion
 
 
 	/**
