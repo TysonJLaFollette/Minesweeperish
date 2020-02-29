@@ -22,6 +22,8 @@ import view.Cell;
 import view.ScorePanel;
 import Model.ArrayListModel;
 
+
+//TODO update to use the new Model interface for all cell flagging.
 /**
  * The MainGame class is only instantiated once. This MainGame object runs and controls everything.
  * It is a JFrame, and listens for the mouse and actions. It is the game window.
@@ -35,7 +37,6 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
 	private int minesMarked;
     private boolean win;
 	private int time = 0;
-    private ArrayList<Character> cellStates;
     private ArrayList<Cell>mineCells;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
@@ -48,7 +49,6 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         this.numCols = numCols;
         this.numMines = numMines;
         win = false;
-        cellStates = new ArrayList<>();
         mineCells = new ArrayList<>();
         this.gameData = new ArrayListModel();
         InitializeField();
@@ -81,11 +81,10 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      * Initializes view components.
      */
     private void InitGraphics(){
-        System.out.println("Initializing graphics.");
         scorePanel = new ScorePanel(this);
         gamePanel = new JPanel();
         this.setIconImage(mineIcon.getImage());
-        this.setTitle("minesweeperish");
+        this.setTitle("Minesweeperish");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel pane = (JPanel)this.getContentPane();
         this.setSize(500, 500);
@@ -113,15 +112,15 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
             int row = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
             mineCells.get(curIndex).setEnabled(false);
             if(gameData.IsMine(column,row)){
-                if(cellStates.get(curIndex) == '?'){
+                if(gameData.IsQuestion(column,row)){
                     mineCells.get(curIndex).setBackground(Color.YELLOW);
                     mineCells.get(curIndex).setIcon(mineIcon);
                 }
-                else if(cellStates.get(curIndex) == 'b'){
+                else if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
                     mineCells.get(curIndex).setBackground(Color.RED);
                     mineCells.get(curIndex).setIcon(mineIcon);
                 }
-                else{
+                else if (gameData.IsFlag(column,row)){
                     mineCells.get(curIndex).setBackground(Color.GREEN);
                     mineCells.get(curIndex).setIcon(mineIcon);
                 }
@@ -156,27 +155,28 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
             int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
             if(SwingUtilities.isLeftMouseButton(arg0)){
                 timer.start();
-                if(cellStates.get(clickedIndex)!='f'){
+                if(!gameData.IsFlag(column, row)){
                     startSweep((Cell)source);
                 }
             }
 
             else if(SwingUtilities.isRightMouseButton(arg0)){
                 if(((Cell) source).isEnabled()){
-                    if(cellStates.get(clickedIndex)=='b'){
-                        cellStates.set(clickedIndex, 'f');
+                    if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
+                        gameData.AddFlag(column,row);
                         ((Cell)source).setImage(flagIcon);
                         minesMarked++;
                         scorePanel.setMines(numMines-minesMarked);
                     }
-                    else if(cellStates.get(clickedIndex)=='f'){
-                        cellStates.set(clickedIndex,'?');
+                    else if(gameData.IsFlag(column,row)){
+                        gameData.AddQuestionMark(column,row);
+                        gameData.RemoveFlag(column,row);
                         ((Cell)source).setImage(questionIcon);
                         minesMarked--;
                         scorePanel.setMines(numMines-minesMarked);
                     }
-                    else if(cellStates.get(clickedIndex)=='?'){
-                        cellStates.set(clickedIndex,'b');
+                    else if(gameData.IsQuestion(column,row)){
+                        gameData.RemoveQuestionMark(column,row);
                         ((Cell)source).setImage(null);
                     }
                 }
@@ -224,22 +224,10 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         System.out.println("Initializing field.");
         gameData.CreateMinefield(numRows, numCols);
         PlantMines(gameData,numMines);
-        System.out.println("Mines according to ArrayListModel:");
-        for (int curRow = 0; curRow < numRows; curRow++){
-            for (int curCol = 0; curCol < numCols; curCol++){
-                if (gameData.IsMine(curCol,curRow)){
-                    System.out.print("m");
-                }else{
-                    System.out.print("0");
-                }
-            }
-            System.out.println("");
-        }
         //TODO this is the perfect Model refactor! We use the new model to fill the old one. Then we replace use cases one at a time.
         //The game remains fully functional the whole time.
         //First, initialize the 1D data structure with empty values.
         for (int curIndex = 0; curIndex < numRows*numCols; curIndex++){
-            cellStates.add('b');
         }
     }
 
@@ -406,9 +394,12 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         time = 0;
         timer.stop();
         for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
+            int column = ConvertIndexToCoordinates(curIndex,numCols,numRows)[0];
+            int row = ConvertIndexToCoordinates(curIndex,numCols,numRows)[1];
             gamePanel.remove(0);
             mineCells.remove(0);
-            cellStates.set(curIndex,'b');
+            gameData.RemoveFlag(column,row);
+            gameData.RemoveQuestionMark(column,row);
         }
         for(int i = 0; i < numRows * numCols; i++){
             Cell tmpCell = new Cell();
@@ -429,7 +420,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
             int column = ConvertIndexToCoordinates(curIndex,numCols,numRows)[0];
             int row = ConvertIndexToCoordinates(curIndex,numCols,numRows)[1];
-            if(gameData.IsMine(column,row) && cellStates.get(curIndex) == 'f'){
+            if(gameData.IsMine(column,row) && gameData.IsFlag(column,row)){
                 minesRight++;
             }
         }
