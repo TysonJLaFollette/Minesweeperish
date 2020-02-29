@@ -35,10 +35,23 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
 	private int minesMarked;
     private boolean win;
 	private int time = 0;
+	//TODO make mineCells and associated functionality 2D instead of 1D.
     private ArrayList<Cell>mineCells;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
 	private Model gameData;
+    private Timer timer = new Timer(1000, this);
+    private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
+    private ImageIcon flagIcon = new ImageIcon("data/flag.png");
+    private ImageIcon questionIcon = new ImageIcon("data/question.png");
+    private ImageIcon oneIcon = new ImageIcon("data/one.png");
+    private ImageIcon twoIcon = new ImageIcon("data/two.png");
+    private ImageIcon threeIcon = new ImageIcon("data/three.png");
+    private ImageIcon fourIcon = new ImageIcon("data/four.png");
+    private ImageIcon fiveIcon = new ImageIcon("data/five.png");
+    private ImageIcon sixIcon = new ImageIcon("data/six.png");
+    private ImageIcon sevenIcon = new ImageIcon("data/seven.png");
+    private ImageIcon eightIcon = new ImageIcon("data/eight.png");
     //endregion
 
     //region Constructors
@@ -51,26 +64,67 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         this.gameData = new ArrayListModel();
         InitializeField();
         InitGraphics();
-        //this.setLocationRelativeTo(null);
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
     //endregion
 
+    //region Public Methods
     /**
-     * Images for the various states of Cells.
+     * Handles mouse events.
+     * @param arg0 The name of the MousEvent being handled...?
      */
-    private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
-    private ImageIcon flagIcon = new ImageIcon("data/flag.png");
-    private ImageIcon questionIcon = new ImageIcon("data/question.png");
-    private ImageIcon oneIcon = new ImageIcon("data/one.png");
-    private ImageIcon twoIcon = new ImageIcon("data/two.png");
-    private ImageIcon threeIcon = new ImageIcon("data/three.png");
-    private ImageIcon fourIcon = new ImageIcon("data/four.png");
-    private ImageIcon fiveIcon = new ImageIcon("data/five.png");
-    private ImageIcon sixIcon = new ImageIcon("data/six.png");
-    private ImageIcon sevenIcon = new ImageIcon("data/seven.png");
-    private ImageIcon eightIcon = new ImageIcon("data/eight.png");
+    @Override
+    public void mouseClicked(MouseEvent arg0) {
+        Object source = arg0.getSource();
+        if (! (source instanceof Cell)){ return; }
+        Cell clickedCell = (Cell)source;
+        if (clickedCell.isEnabled() == false) { return; }
+        int clickedIndex = clickedCell.getIndex();
+        int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
+        int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
+        if(SwingUtilities.isLeftMouseButton(arg0)){
+            timer.start();
+            if(!gameData.IsFlag(column, row)){
+                startSweep(clickedCell);
+            }
+        } else if(SwingUtilities.isRightMouseButton(arg0)){
+            CycleFlags(column,row);
+        }
+        flagCheck();
+    }
 
+    @Override
+    public void mouseEntered(MouseEvent e) {}
+
+    @Override
+    public void mouseExited(MouseEvent e) {}
+
+    @Override
+    public void mousePressed(MouseEvent e) {}
+
+    @Override
+    public void mouseReleased(MouseEvent e) {}
+
+    /**
+     * Handles generic action events. Primarily used to update game timer.
+     * @param arg0 The name of the ActionEvent being handled.
+     */
+    @Override
+    public void actionPerformed(ActionEvent arg0) {
+        Object source = arg0.getSource();
+        if(source!= timer){
+            newGame();
+        }
+        if(source == timer){
+            time++;
+            scorePanel.setTime(time);
+        }
+
+    }
+    //endregion
+
+    //region Private Methods
     /**
      * Initializes view components.
      */
@@ -127,89 +181,14 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         }
     }
 
-    /**
-     * Handles mouse events.
-     * @param arg0 The name of the MousEvent being handled...?
-     */
-    @Override
-    public void mouseClicked(MouseEvent arg0) {
-        Object source = arg0.getSource();
-        if (! (source instanceof Cell)){ return; }
-        Cell clickedCell = (Cell)source;
-        if (clickedCell.isEnabled() == false) { return; }
-        int clickedIndex = clickedCell.getIndex();
-        int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
-        int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
-        if(SwingUtilities.isLeftMouseButton(arg0)){
-            timer.start();
-            if(!gameData.IsFlag(column, row)){
-                startSweep(clickedCell);
-            }
-        } else if(SwingUtilities.isRightMouseButton(arg0)){
-            if(clickedCell.isEnabled()){
-                if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
-                    gameData.AddFlag(column,row);
-                    ((Cell)source).setImage(flagIcon);
-                    minesMarked++;
-                    scorePanel.setMines(numMines-minesMarked);
-                }
-                else if(gameData.IsFlag(column,row)){
-                    gameData.AddQuestionMark(column,row);
-                    gameData.RemoveFlag(column,row);
-                    ((Cell)source).setImage(questionIcon);
-                    minesMarked--;
-                    scorePanel.setMines(numMines-minesMarked);
-                }
-                else if(gameData.IsQuestion(column,row)){
-                    gameData.RemoveQuestionMark(column,row);
-                    ((Cell)source).setImage(null);
-                }
-            }
-        }
-        flagCheck();
-    }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {}
-
-    @Override
-    public void mouseExited(MouseEvent e) {}
-
-    @Override
-    public void mousePressed(MouseEvent e) {}
-
-    @Override
-    public void mouseReleased(MouseEvent e) {}
-
-    /**
-     * Handles generic action events. Primarily used to update game timer.
-     * @param arg0 The name of the ActionEvent being handled.
-     */
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        Object source = arg0.getSource();
-        if(source!= timer){
-            newGame();
-        }
-        if(source == timer){
-            time++;
-            scorePanel.setTime(time);
-        }
-
-    }
 
     /**
      * Creates a minefield with the desired number of mines.
      */
     private void InitializeField(){
-        System.out.println("Initializing field.");
         gameData.CreateMinefield(numRows, numCols);
         PlantMines(gameData,numMines);
-        //TODO this is the perfect Model refactor! We use the new model to fill the old one. Then we replace use cases one at a time.
-        //The game remains fully functional the whole time.
-        //First, initialize the 1D data structure with empty values.
-        for (int curIndex = 0; curIndex < numRows*numCols; curIndex++){
-        }
     }
 
     /**
@@ -322,6 +301,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      */
     private void startSweep(Cell theCell){
         List<Boolean> visits = new ArrayList<>();
+        //TODO this is where visits is created. Make it 2D.
         for(int i = 0; i < numRows * numCols; i++){
             visits.add(false);
         }
@@ -382,6 +362,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
             gameData.RemoveFlag(column,row);
             gameData.RemoveQuestionMark(column,row);
         }
+
         for(int i = 0; i < numRows * numCols; i++){
             Cell tmpCell = new Cell();
             tmpCell.setIndex(i);
@@ -389,6 +370,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
             mineCells.add(tmpCell);
             gamePanel.add(tmpCell);
         }
+
         InitializeField();
         update(getGraphics());
     }
@@ -398,11 +380,11 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      */
     private void flagCheck(){
         int minesRight = 0;
-        for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
-            int column = ConvertIndexToCoordinates(curIndex,numCols,numRows)[0];
-            int row = ConvertIndexToCoordinates(curIndex,numCols,numRows)[1];
-            if(gameData.IsMine(column,row) && gameData.IsFlag(column,row)){
-                minesRight++;
+        for (int curCol = 0; curCol < numCols; curCol++){
+            for (int curRow = 0; curRow < numRows; curRow++){
+                if (gameData.IsMine(curCol,curRow) && gameData.IsFlag(curCol,curRow)){
+                    minesRight++;
+                }
             }
         }
         if(minesRight == numMines){
@@ -411,18 +393,26 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         }
     }
 
-
-	/**
-	 * Timer for keeping score.
-	 */
-	private Timer timer = new Timer(1000, this);
-
-
-
-	/**
-	 * Starts the game timer.
-	 */
-	public void startGame(){
-		timer.start();
-	}
+    private void CycleFlags(int column, int row){
+        int indexToCycle = ConvertCoordinatesToIndex(new int[]{column,row});
+        Cell cellTocycle = mineCells.get(indexToCycle);
+        if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
+            gameData.AddFlag(column,row);
+            cellTocycle.setImage(flagIcon);
+            minesMarked++;
+            scorePanel.setMines(numMines-minesMarked);
+        }
+        else if(gameData.IsFlag(column,row)){
+            gameData.AddQuestionMark(column,row);
+            gameData.RemoveFlag(column,row);
+            cellTocycle.setImage(questionIcon);
+            minesMarked--;
+            scorePanel.setMines(numMines-minesMarked);
+        }
+        else if(gameData.IsQuestion(column,row)){
+            gameData.RemoveQuestionMark(column,row);
+            cellTocycle.setImage(null);
+        }
+    }
+    //endregion
 }
