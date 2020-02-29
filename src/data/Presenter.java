@@ -35,7 +35,6 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
 	private int minesMarked;
     private boolean win;
 	private int time = 0;
-    private ArrayList<Character> minefield;
     private ArrayList<Character> cellStates;
     private ArrayList<Cell>mineCells;
 	private ScorePanel scorePanel;
@@ -49,7 +48,6 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         this.numCols = numCols;
         this.numMines = numMines;
         win = false;
-        minefield = new ArrayList<>();
         cellStates = new ArrayList<>();
         mineCells = new ArrayList<>();
         this.gameData = new ArrayListModel();
@@ -241,29 +239,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         //The game remains fully functional the whole time.
         //First, initialize the 1D data structure with empty values.
         for (int curIndex = 0; curIndex < numRows*numCols; curIndex++){
-            minefield.add('0');
             cellStates.add('b');
-        }
-
-        //Now fill minefield model from the ArrayListModel.
-        for (int curCol = 0; curCol < numCols; curCol++){
-            for (int curRow = 0; curRow < numRows; curRow++){
-                int curIndex = ConvertCoordinatesToIndex(new int[]{curCol,curRow});
-                if(gameData.IsMine(curCol,curRow)){
-                    minefield.set(curIndex,'m');
-                }
-            }
-        }
-        System.out.println("\nMines according to 1D:");
-        for (int curRow = 0; curRow < numRows; curRow++){
-            for (int curCol = 0; curCol < numCols; curCol++){
-                if (minefield.get(curRow*24+curCol)=='m'){
-                    System.out.print("m");
-                }else{
-                    System.out.print("0");
-                }
-            }
-            System.out.println("");
         }
     }
 
