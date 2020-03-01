@@ -27,7 +27,8 @@ import Model.ArrayListModel;
  * It is a JFrame, and listens for the mouse and actions. It is the game window.
  * @author Tyson J LaFollette
  */
-public class Presenter extends JFrame implements MouseListener, ActionListener{
+//TODO Separate business logic and display logic. Since display logic cannot be extracted individually, maybe extract the business logic instead?
+public class View extends JFrame implements MouseListener, ActionListener{
     //region Properties
     private int numRows;
     private int numCols;
@@ -55,7 +56,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
     //endregion
 
     //region Constructors
-    public Presenter(int numRows, int numCols, int numMines){
+    public View(int numRows, int numCols, int numMines){
         this.numRows = numRows;
         this.numCols = numCols;
         this.numMines = numMines;
@@ -76,10 +77,11 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      */
     @Override
     public void mouseClicked(MouseEvent arg0) {
+        //TODO This is a View function. It should only update the UI and call a Presenter function.
         Object source = arg0.getSource();
         if (! (source instanceof Cell)){ return; }
         Cell clickedCell = (Cell)source;
-        if (clickedCell.isEnabled() == false) { return; }
+        if (!clickedCell.isEnabled()) { return; }
         int clickedIndex = clickedCell.getIndex();
         int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
         int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
@@ -112,6 +114,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      */
     @Override
     public void actionPerformed(ActionEvent arg0) {
+        //This is a Presenter function. Timekeeping should be independent of the UI.
         Object source = arg0.getSource();
         if(source!= timer){
             newGame();
@@ -154,6 +157,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
      * Displays final messages, shows mine locations.
      */
     private void GameOver(){
+        //TODO This is a View function, it should only update the UI and call a Presenter function.
         timer.stop();
         for (int curCol = 0; curCol < numCols; curCol++){
             for(int curRow = 0; curRow < numRows; curRow++){
@@ -204,7 +208,7 @@ public class Presenter extends JFrame implements MouseListener, ActionListener{
         }
         Collections.shuffle(listToShuffle);
         for (int curIndex = 0; curIndex < gameData.GetNumRows()*gameData.GetNumCols(); curIndex++){
-            if (listToShuffle.get(curIndex) == true){
+            if (listToShuffle.get(curIndex)){
                 int row = ConvertIndexToCoordinates(curIndex, numCols,numRows)[1];
                 int column = ConvertIndexToCoordinates(curIndex, numCols,numRows)[0];
                 gameData.AddMine(column,row);
