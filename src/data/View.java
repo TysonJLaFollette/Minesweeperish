@@ -18,6 +18,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import Model.Model;
+import Presenter.Presenter;
 import view.Cell;
 import view.ScorePanel;
 import Model.ArrayListModel;
@@ -34,13 +35,14 @@ public class View extends JFrame implements MouseListener, ActionListener{
     private int numCols;
     private int numMines;
 	private int minesMarked;
-    private boolean win;
+    public boolean win;
 	private int time = 0;
 	//TODO make mineCells and associated functionality 2D instead of 1D.
     private ArrayList<Cell>mineCells;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
 	private Model gameData;
+	private Presenter presenter;
     private Timer timer = new Timer(1000, this);
     private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
     private ImageIcon flagIcon = new ImageIcon("data/flag.png");
@@ -56,44 +58,37 @@ public class View extends JFrame implements MouseListener, ActionListener{
     //endregion
 
     //region Constructors
-    public View(int numRows, int numCols, int numMines){
+    public View(Presenter presenter, int numRows, int numCols, int numMines){
+        this.presenter = presenter;
         this.numRows = numRows;
         this.numCols = numCols;
         this.numMines = numMines;
         win = false;
         mineCells = new ArrayList<>();
-        this.gameData = new ArrayListModel();
-        InitializeField();
+        this.gameData = presenter.GetModel();//new ArrayListModel();
+        //presenter.InitializeField();
         InitGraphics();
-        this.setLocationRelativeTo(null);
-        this.setVisible(true);
     }
     //endregion
 
     //region Public Methods
     /**
      * Handles mouse events.
-     * @param arg0 The name of the MousEvent being handled...?
+     * @param arg0 The name of the MouseEvent being handled...?
      */
     @Override
     public void mouseClicked(MouseEvent arg0) {
-        //TODO This is a View function. It should only update the UI and call a Presenter function.
         Object source = arg0.getSource();
         if (! (source instanceof Cell)){ return; }
         Cell clickedCell = (Cell)source;
         if (!clickedCell.isEnabled()) { return; }
         int clickedIndex = clickedCell.getIndex();
-        int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
-        int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
         if(SwingUtilities.isLeftMouseButton(arg0)){
-            timer.start();
-            if(!gameData.IsFlag(column, row)){
-                startSweep(clickedCell);
-            }
+            startSweep(clickedCell);
         } else if(SwingUtilities.isRightMouseButton(arg0)){
-            CycleFlags(column,row);
+            CycleFlags(clickedCell);
         }
-        flagCheck();
+        presenter.flagCheck();
     }
 
     @Override
@@ -114,7 +109,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
      */
     @Override
     public void actionPerformed(ActionEvent arg0) {
-        //This is a Presenter function. Timekeeping should be independent of the UI.
         Object source = arg0.getSource();
         if(source!= timer){
             newGame();
@@ -151,12 +145,14 @@ public class View extends JFrame implements MouseListener, ActionListener{
             mineCells.add(tmpCell);
             gamePanel.add(tmpCell);
         }
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
     }
 
     /**
      * Displays final messages, shows mine locations.
      */
-    private void GameOver(){
+    public void GameOver(){
         //TODO This is a View function, it should only update the UI and call a Presenter function.
         timer.stop();
         for (int curCol = 0; curCol < numCols; curCol++){
@@ -187,34 +183,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
 
 
 
-    /**
-     * Creates a minefield with the desired number of mines.
-     */
-    private void InitializeField(){
-        gameData.CreateMinefield(numRows, numCols);
-        PlantMines(gameData,numMines);
-    }
 
-    /**
-     * Plants the desired number of mines randomly within the given minefield.
-     * @param gameData The Model containing the minefield.
-     * @param numMines The number of mines to place.
-     */
-    private void PlantMines(Model gameData, int numMines){
-        ArrayList<Boolean> listToShuffle = new ArrayList<>();
-        for (int i = 0; i < gameData.GetNumRows()*gameData.GetNumCols(); i++){
-            boolean cellValue = i < numMines;
-            listToShuffle.add(cellValue);
-        }
-        Collections.shuffle(listToShuffle);
-        for (int curIndex = 0; curIndex < gameData.GetNumRows()*gameData.GetNumCols(); curIndex++){
-            if (listToShuffle.get(curIndex)){
-                int row = ConvertIndexToCoordinates(curIndex, numCols,numRows)[1];
-                int column = ConvertIndexToCoordinates(curIndex, numCols,numRows)[0];
-                gameData.AddMine(column,row);
-            }
-        }
-    }
 
     /**
      * Converts a 1D index into 2D coordinates for a minefield of the given dimensions.
@@ -301,15 +270,20 @@ public class View extends JFrame implements MouseListener, ActionListener{
 
     /**
      * Starts sweep of cells.
-     * @param theCell The Cell object to begin a sweep on.
+     * @param clickedCell The Cell object to begin a sweep on.
      */
-    private void startSweep(Cell theCell){
+    private void startSweep(Cell clickedCell){
+        timer.start();
+        int clickedIndex = clickedCell.getIndex();
+        int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
+        int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
+        if(gameData.IsFlag(column, row)){ return; }
         List<Boolean> visits = new ArrayList<>();
         //TODO this is where visits is created. Make it 2D.
         for(int i = 0; i < numRows * numCols; i++){
             visits.add(false);
         }
-        sweepCell(theCell, visits);
+        sweepCell(clickedCell, visits);
     }
 
     /**
@@ -375,47 +349,33 @@ public class View extends JFrame implements MouseListener, ActionListener{
             gamePanel.add(tmpCell);
         }
 
-        InitializeField();
+        presenter.InitializeField();
         update(getGraphics());
     }
 
-    /**
-     * Checks whether the player has won each time they press a cell.
-     */
-    private void flagCheck(){
-        int minesRight = 0;
-        for (int curCol = 0; curCol < numCols; curCol++){
-            for (int curRow = 0; curRow < numRows; curRow++){
-                if (gameData.IsMine(curCol,curRow) && gameData.IsFlag(curCol,curRow)){
-                    minesRight++;
-                }
-            }
-        }
-        if(minesRight == numMines){
-            win = true;
-            GameOver();
-        }
-    }
 
-    private void CycleFlags(int column, int row){
-        int indexToCycle = ConvertCoordinatesToIndex(new int[]{column,row});
-        Cell cellTocycle = mineCells.get(indexToCycle);
+
+    private void CycleFlags(Cell clickedCell){
+        int clickedIndex = clickedCell.getIndex();
+        int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
+        int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
+
         if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
             gameData.AddFlag(column,row);
-            cellTocycle.setImage(flagIcon);
+            clickedCell.setImage(flagIcon);
             minesMarked++;
             scorePanel.setMines(numMines-minesMarked);
         }
         else if(gameData.IsFlag(column,row)){
             gameData.AddQuestionMark(column,row);
             gameData.RemoveFlag(column,row);
-            cellTocycle.setImage(questionIcon);
+            clickedCell.setImage(questionIcon);
             minesMarked--;
             scorePanel.setMines(numMines-minesMarked);
         }
         else if(gameData.IsQuestion(column,row)){
             gameData.RemoveQuestionMark(column,row);
-            cellTocycle.setImage(null);
+            clickedCell.setImage(null);
         }
     }
     //endregion
