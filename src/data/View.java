@@ -39,6 +39,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
 	private int time = 0;
 	//TODO make mineCells and associated functionality 2D instead of 1D.
     private ArrayList<Cell>mineCells;
+    private ArrayList<ArrayList<Cell>> mineCells2D;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
 	private Model gameData;
@@ -65,8 +66,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
         this.numMines = numMines;
         win = false;
         mineCells = new ArrayList<>();
-        this.gameData = presenter.GetModel();//new ArrayListModel();
-        //presenter.InitializeField();
+        mineCells2D = new ArrayList<>();
+        this.gameData = presenter.GetModel();
         InitGraphics();
     }
     //endregion
@@ -138,11 +139,21 @@ public class View extends JFrame implements MouseListener, ActionListener{
         pane.add(gamePanel);
         gamePanel.setLayout(new GridLayout(numRows,numCols));
         scorePanel.setMines(numMines);
+        // Load 2D mineCells
+        for (int curCol = 0; curCol < numCols; curCol++){
+            mineCells2D.add(new ArrayList<>());
+        }
         for (int curIndex = 0; curIndex < numCols*numRows; curIndex++){
             Cell tmpCell = new Cell();
             tmpCell.setIndex(curIndex);
+            tmpCell.setColumn(ConvertIndexToCoordinates(curIndex,numCols,numRows)[0]);
+            tmpCell.setRow(ConvertIndexToCoordinates(curIndex,numCols,numRows)[1]);
             tmpCell.addMouseListener(this);
             mineCells.add(tmpCell);
+            mineCells2D.get(ConvertIndexToCoordinates(curIndex,numCols,numRows)[0]).add(tmpCell);
+            System.out.println("Added cell " + curIndex + " at column " + tmpCell.getColumn() + " row " + tmpCell.getRow());
+            System.out.println("Verified at " + mineCells2D.get(ConvertIndexToCoordinates(curIndex,numCols,numRows)[0])
+                    .get(ConvertIndexToCoordinates(curIndex,numCols,numRows)[1]).getIndex());
             gamePanel.add(tmpCell);
         }
         this.setLocationRelativeTo(null);

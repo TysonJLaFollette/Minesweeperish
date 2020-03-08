@@ -17,6 +17,10 @@ public class Cell extends JButton{
 	 */
 	private int index;
 
+	private int column;
+
+	private int row;
+
 	/**
 	 * Sets default parameters for the Cell.
 	 */
@@ -25,6 +29,21 @@ public class Cell extends JButton{
 		this.setSize(50, 50);
 	}
 
+	public int getRow() {
+		return row;
+	}
+
+	public void setRow(int row) {
+		this.row = row;
+	}
+
+	public int getColumn() {
+		return column;
+	}
+
+	public void setColumn(int column) {
+		this.column = column;
+	}
 	/**
      * Returns the Cell's unique index number.
 	 * @return A unique index number for this Cell.
