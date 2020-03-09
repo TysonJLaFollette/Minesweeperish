@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -21,7 +20,6 @@ import Model.Model;
 import Presenter.Presenter;
 import view.Cell;
 import view.ScorePanel;
-import Model.ArrayListModel;
 
 /**
  * The MainGame class is only instantiated once. This MainGame object runs and controls everything.
@@ -192,10 +190,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
         }
     }
 
-
-
-
-
     /**
      * Converts a 1D index into 2D coordinates for a minefield of the given dimensions.
      * @param index The 1D index to convert.
@@ -219,63 +213,37 @@ public class View extends JFrame implements MouseListener, ActionListener{
      */
     private void caseZero(int index, List<Boolean> visits){
         //TODO refactor this hideous thing. These cases are not mutually exclusive.
-        if(index == 0){
-            sweepCell(mineCells.get(index+1), visits);
-            sweepCell(mineCells.get(index+24), visits);
-            sweepCell(mineCells.get(index+25), visits);
+        //TODO make this use 2D mineCells.
+        int column = ConvertIndexToCoordinates(index,numCols,numRows)[0];
+        int row = ConvertIndexToCoordinates(index,numCols,numRows)[1];
+        boolean prevCol = column - 1 > 0 ? true : false;
+        boolean nextCol = column + 1 < numCols ? true : false;
+        boolean prevRow = row - 1 > 0 ? true : false;
+        boolean nextRow = row + 1 < numRows ? true : false;
+
+        if(prevCol && prevRow){
+            sweepCell(mineCells2D.get(column-1).get(row-1), visits);
         }
-        else if (index == 23){
-            sweepCell(mineCells.get(index-1), visits);
-            sweepCell(mineCells.get(index+23), visits);
-            sweepCell(mineCells.get(index+24), visits);
+        if (prevRow){
+            sweepCell(mineCells2D.get(column).get(row-1),visits);
         }
-        else if(index < 24){
-            sweepCell(mineCells.get(index-1), visits);
-            sweepCell(mineCells.get(index+1), visits);
-            sweepCell(mineCells.get(index+23), visits);
-            sweepCell(mineCells.get(index+24), visits);
-            sweepCell(mineCells.get(index+25), visits);
+        if (nextCol && prevRow){
+            sweepCell(mineCells2D.get(column+1).get(row -1),visits);
         }
-        else if (index == numRows * numCols){
-            sweepCell(mineCells.get(index-25), visits);
-            sweepCell(mineCells.get(index-24), visits);
-            sweepCell(mineCells.get(index-1), visits);
+        if (prevCol) {
+            sweepCell(mineCells2D.get(column-1).get(row),visits);
         }
-        else if (index ==552){
-            sweepCell(mineCells.get(index-24), visits);
-            sweepCell(mineCells.get(index-23), visits);
-            sweepCell(mineCells.get(index+1), visits);
+        if (nextCol) {
+            sweepCell(mineCells2D.get(column + 1).get(row),visits);
         }
-        else if(index >552){
-            sweepCell(mineCells.get(index-25), visits);
-            sweepCell(mineCells.get(index-24), visits);
-            sweepCell(mineCells.get(index-23), visits);
-            sweepCell(mineCells.get(index-1), visits);
-            sweepCell(mineCells.get(index+1), visits);
+        if (prevCol && nextRow){
+            sweepCell(mineCells2D.get(column - 1).get(row + 1),visits);
         }
-        else if(index%24 == 0){//on left edge
-            sweepCell(mineCells.get(index-24), visits);
-            sweepCell(mineCells.get(index-23), visits);
-            sweepCell(mineCells.get(index+1), visits);
-            sweepCell(mineCells.get(index+24), visits);
-            sweepCell(mineCells.get(index+25), visits);
+        if (nextRow){
+            sweepCell(mineCells2D.get(column).get(row + 1),visits);
         }
-        else if ((index+1)%23 == 0){//on right edge
-            sweepCell(mineCells.get(index-25), visits);
-            sweepCell(mineCells.get(index-24), visits);
-            sweepCell(mineCells.get(index-1), visits);
-            sweepCell(mineCells.get(index+23), visits);
-            sweepCell(mineCells.get(index+24), visits);
-        }
-        else {
-            sweepCell(mineCells.get(index-25), visits);
-            sweepCell(mineCells.get(index-24), visits);
-            sweepCell(mineCells.get(index-23), visits);
-            sweepCell(mineCells.get(index-1), visits);
-            sweepCell(mineCells.get(index+1), visits);
-            sweepCell(mineCells.get(index+23), visits);
-            sweepCell(mineCells.get(index+24), visits);
-            sweepCell(mineCells.get(index+25), visits);
+        if (nextCol && nextRow){
+            sweepCell(mineCells2D.get(column + 1).get(row + 1),visits);
         }
     }
 
@@ -352,11 +320,24 @@ public class View extends JFrame implements MouseListener, ActionListener{
             gameData.RemoveQuestionMark(column,row);
         }
 
+        for (int curCol = 0; curCol < numCols; curCol++){
+            mineCells2D.remove(0);
+        }
+
+        for (int curCol = 0; curCol < numCols; curCol++){
+            mineCells2D.add(new ArrayList<>());
+        }
+
         for(int i = 0; i < numRows * numCols; i++){
+            int column = ConvertIndexToCoordinates(i,numCols,numRows)[0];
+            int row = ConvertIndexToCoordinates(i,numCols,numRows)[1];
             Cell tmpCell = new Cell();
             tmpCell.setIndex(i);
+            tmpCell.setColumn(column);
+            tmpCell.setRow(row);
             tmpCell.addMouseListener(this);
             mineCells.add(tmpCell);
+            mineCells2D.get(column).add(tmpCell);
             gamePanel.add(tmpCell);
         }
 
