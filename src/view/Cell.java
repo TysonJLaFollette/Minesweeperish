@@ -11,12 +11,6 @@ import javax.swing.JButton;
  * @author Tyson
  */
 public class Cell extends JButton{
-
-	/**
-	 * Each Cell is identified by a unique index number.
-	 */
-	private int index;
-
 	private int column;
 
 	private int row;
@@ -25,7 +19,8 @@ public class Cell extends JButton{
 	 * Sets default parameters for the Cell.
 	 */
 	public Cell(){
-		index = -1;
+		column = -1;
+		row = -1;
 		this.setSize(50, 50);
 	}
 
@@ -43,21 +38,6 @@ public class Cell extends JButton{
 
 	public void setColumn(int column) {
 		this.column = column;
-	}
-	/**
-     * Returns the Cell's unique index number.
-	 * @return A unique index number for this Cell.
-	 */
-	public int getIndex(){
-		return index;
-	}
-
-	/**
-     * Sets the Cell's unique index number.
-	 * @param newIndex A unique number to identify this Cell.
-	 */
-	public void setIndex(int newIndex){
-		index = newIndex;
 	}
 
 	/**

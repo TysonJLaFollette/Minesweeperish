@@ -35,8 +35,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
 	private int minesMarked;
     public boolean win;
 	private int time = 0;
-	//TODO make mineCells and associated functionality 2D instead of 1D.
-    private ArrayList<Cell>mineCells;
     private ArrayList<ArrayList<Cell>> mineCells2D;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
@@ -63,7 +61,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
         this.numCols = numCols;
         this.numMines = numMines;
         win = false;
-        mineCells = new ArrayList<>();
         mineCells2D = new ArrayList<>();
         this.gameData = presenter.GetModel();
         InitGraphics();
@@ -81,7 +78,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
         if (! (source instanceof Cell)){ return; }
         Cell clickedCell = (Cell)source;
         if (!clickedCell.isEnabled()) { return; }
-        int clickedIndex = clickedCell.getIndex();
         if(SwingUtilities.isLeftMouseButton(arg0)){
             startSweep(clickedCell);
         } else if(SwingUtilities.isRightMouseButton(arg0)){
@@ -137,22 +133,18 @@ public class View extends JFrame implements MouseListener, ActionListener{
         pane.add(gamePanel);
         gamePanel.setLayout(new GridLayout(numRows,numCols));
         scorePanel.setMines(numMines);
-        // Load 2D mineCells
         for (int curCol = 0; curCol < numCols; curCol++){
             mineCells2D.add(new ArrayList<>());
-        }
-        for (int curIndex = 0; curIndex < numCols*numRows; curIndex++){
-            Cell tmpCell = new Cell();
-            tmpCell.setIndex(curIndex);
-            tmpCell.setColumn(ConvertIndexToCoordinates(curIndex,numCols,numRows)[0]);
-            tmpCell.setRow(ConvertIndexToCoordinates(curIndex,numCols,numRows)[1]);
-            tmpCell.addMouseListener(this);
-            mineCells.add(tmpCell);
-            mineCells2D.get(ConvertIndexToCoordinates(curIndex,numCols,numRows)[0]).add(tmpCell);
-            System.out.println("Added cell " + curIndex + " at column " + tmpCell.getColumn() + " row " + tmpCell.getRow());
-            System.out.println("Verified at " + mineCells2D.get(ConvertIndexToCoordinates(curIndex,numCols,numRows)[0])
-                    .get(ConvertIndexToCoordinates(curIndex,numCols,numRows)[1]).getIndex());
-            gamePanel.add(tmpCell);
+            for (int curRow = 0; curRow < numRows; curRow++){
+                Cell tmpCell = new Cell();
+                //TODO this index is still used. Remove that reference.
+                tmpCell.setColumn(curCol);
+                tmpCell.setRow(curRow);
+                tmpCell.addMouseListener(this);
+                mineCells2D.get(curCol).add(tmpCell);
+                gamePanel.add(tmpCell);
+
+            }
         }
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -167,17 +159,17 @@ public class View extends JFrame implements MouseListener, ActionListener{
         for (int curCol = 0; curCol < numCols; curCol++){
             for(int curRow = 0; curRow < numRows; curRow++){
                 int curIndex = ConvertCoordinatesToIndex(new int[]{curCol,curRow});
-                mineCells.get(curIndex).setEnabled(false);
+                mineCells2D.get(curCol).get(curRow).setEnabled(false);
                 if (gameData.IsMine(curCol,curRow)){
                     if (gameData.IsFlag(curCol,curRow)){
-                        mineCells.get(curIndex).setBackground(Color.GREEN);
-                        mineCells.get(curIndex).setIcon(mineIcon);
+                        mineCells2D.get(curCol).get(curRow).setBackground(Color.GREEN);
+                        mineCells2D.get(curCol).get(curRow).setIcon(mineIcon);
                     } else if (gameData.IsQuestion(curCol,curRow)){
-                        mineCells.get(curIndex).setBackground(Color.YELLOW);
-                        mineCells.get(curIndex).setIcon(mineIcon);
+                        mineCells2D.get(curCol).get(curRow).setBackground(Color.YELLOW);
+                        mineCells2D.get(curCol).get(curRow).setIcon(mineIcon);
                     } else {
-                        mineCells.get(curIndex).setBackground(Color.RED);
-                        mineCells.get(curIndex).setIcon(mineIcon);
+                        mineCells2D.get(curCol).get(curRow).setBackground(Color.RED);
+                        mineCells2D.get(curCol).get(curRow).setIcon(mineIcon);
                     }
                 }
             }
@@ -212,8 +204,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
      * @param index the unique index of the Cell to examine.
      */
     private void caseZero(int index, List<Boolean> visits){
-        //TODO refactor this hideous thing. These cases are not mutually exclusive.
-        //TODO make this use 2D mineCells.
         int column = ConvertIndexToCoordinates(index,numCols,numRows)[0];
         int row = ConvertIndexToCoordinates(index,numCols,numRows)[1];
         boolean prevCol = column - 1 > 0 ? true : false;
@@ -253,9 +243,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
      */
     private void startSweep(Cell clickedCell){
         timer.start();
-        int clickedIndex = clickedCell.getIndex();
-        int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
-        int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
+        int column = clickedCell.getColumn();
+        int row = clickedCell.getRow();
         if(gameData.IsFlag(column, row)){ return; }
         List<Boolean> visits = new ArrayList<>();
         //TODO this is where visits is created. Make it 2D.
@@ -270,9 +259,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
      * @param theCell the Cell to reveal.
      */
     private void sweepCell(Cell theCell, List<Boolean> visits){
-        int index = theCell.getIndex();
-        int column = ConvertIndexToCoordinates(index, numCols,numRows)[0];
-        int row = ConvertIndexToCoordinates(index, numCols,numRows)[1];
+        int column = theCell.getColumn();
+        int row = theCell.getRow();
+        int index = ConvertCoordinatesToIndex(new int[]{column,row});
         int numAdjacent = gameData.GetNumAdjacent(column,row);
         if(visits.get(index)){
             return;
@@ -315,7 +304,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
             int column = ConvertIndexToCoordinates(curIndex,numCols,numRows)[0];
             int row = ConvertIndexToCoordinates(curIndex,numCols,numRows)[1];
             gamePanel.remove(0);
-            mineCells.remove(0);
             gameData.RemoveFlag(column,row);
             gameData.RemoveQuestionMark(column,row);
         }
@@ -332,11 +320,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
             int column = ConvertIndexToCoordinates(i,numCols,numRows)[0];
             int row = ConvertIndexToCoordinates(i,numCols,numRows)[1];
             Cell tmpCell = new Cell();
-            tmpCell.setIndex(i);
             tmpCell.setColumn(column);
             tmpCell.setRow(row);
             tmpCell.addMouseListener(this);
-            mineCells.add(tmpCell);
             mineCells2D.get(column).add(tmpCell);
             gamePanel.add(tmpCell);
         }
@@ -348,9 +334,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
 
 
     private void CycleFlags(Cell clickedCell){
-        int clickedIndex = clickedCell.getIndex();
-        int column = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
-        int row = ConvertIndexToCoordinates(clickedIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
+        int column = clickedCell.getColumn();
+        int row = clickedCell.getRow();
 
         if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
             gameData.AddFlag(column,row);
