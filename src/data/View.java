@@ -137,7 +137,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
             mineCells2D.add(new ArrayList<>());
             for (int curRow = 0; curRow < numRows; curRow++){
                 Cell tmpCell = new Cell();
-                //TODO this index is still used. Remove that reference.
                 tmpCell.setColumn(curCol);
                 tmpCell.setRow(curRow);
                 tmpCell.addMouseListener(this);
@@ -154,11 +153,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
      * Displays final messages, shows mine locations.
      */
     public void GameOver(){
-        //TODO This is a View function, it should only update the UI and call a Presenter function.
         timer.stop();
         for (int curCol = 0; curCol < numCols; curCol++){
             for(int curRow = 0; curRow < numRows; curRow++){
-                int curIndex = ConvertCoordinatesToIndex(new int[]{curCol,curRow});
                 mineCells2D.get(curCol).get(curRow).setEnabled(false);
                 if (gameData.IsMine(curCol,curRow)){
                     if (gameData.IsFlag(curCol,curRow)){
@@ -201,15 +198,14 @@ public class View extends JFrame implements MouseListener, ActionListener{
 
     /**
      * Makes many cells reveal themselves if the player clicks on one that has no adjacent mines.
-     * @param index the unique index of the Cell to examine.
      */
-    private void caseZero(int index, List<Boolean> visits){
-        int column = ConvertIndexToCoordinates(index,numCols,numRows)[0];
-        int row = ConvertIndexToCoordinates(index,numCols,numRows)[1];
-        boolean prevCol = column - 1 > 0 ? true : false;
-        boolean nextCol = column + 1 < numCols ? true : false;
-        boolean prevRow = row - 1 > 0 ? true : false;
-        boolean nextRow = row + 1 < numRows ? true : false;
+    private void caseZero(Cell theCell, List<Boolean> visits){
+        int column = theCell.getColumn();
+        int row = theCell.getRow();
+        boolean prevCol = column - 1 > 0;
+        boolean nextCol = column + 1 < numCols;
+        boolean prevRow = row - 1 > 0;
+        boolean nextRow = row + 1 < numRows;
 
         if(prevCol && prevRow){
             sweepCell(mineCells2D.get(column-1).get(row-1), visits);
@@ -273,7 +269,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             if (gameData.IsMine(column,row)){
                 GameOver();
             } else if (numAdjacent == 0) {
-                caseZero(index, visits);
+                caseZero(theCell, visits);
             } else if (numAdjacent == 1){
                 theCell.setIcon(oneIcon);
             } else if (numAdjacent == 2){
