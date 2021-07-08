@@ -199,9 +199,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
     private void caseZero(Cell theCell, List<Boolean> visits){
         int column = theCell.getColumn();
         int row = theCell.getRow();
-        boolean prevCol = column - 1 > 0;
+        boolean prevCol = column - 1 >= 0;
         boolean nextCol = column + 1 < viewNumCols;
-        boolean prevRow = row - 1 > 0;
+        boolean prevRow = row - 1 >= 0;
         boolean nextRow = row + 1 < viewNumRows;
 
         if(prevCol && prevRow){
