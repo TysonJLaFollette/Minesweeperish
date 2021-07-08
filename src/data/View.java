@@ -29,12 +29,14 @@ import view.ScorePanel;
 //TODO Separate business logic and display logic. Since display logic cannot be extracted individually, maybe extract the business logic instead?
 public class View extends JFrame implements MouseListener, ActionListener{
     //region Properties
-    private int numRows;
-    private int numCols;
-    private int numMines;
+    private int viewNumRows;
+    private int viewNumCols;
+    private int viewNumMines;
 	private int minesMarked;
     public boolean win;
 	private int time = 0;
+	//TODO mineCells2D was built to allow interacting with the buttons using coordinates instead of an index.
+    //TODO this data structure should be replaced with the new presenter.ConvertIndexToCoords()
     private ArrayList<ArrayList<Cell>> mineCells2D;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
@@ -55,11 +57,11 @@ public class View extends JFrame implements MouseListener, ActionListener{
     //endregion
 
     //region Constructors
-    public View(Presenter presenter, int numRows, int numCols, int numMines){
+    public View(Presenter presenter, int viewNumRows, int viewNumCols, int viewNumMines){
         this.presenter = presenter;
-        this.numRows = numRows;
-        this.numCols = numCols;
-        this.numMines = numMines;
+        this.viewNumRows = viewNumRows;
+        this.viewNumCols = viewNumCols;
+        this.viewNumMines = viewNumMines;
         win = false;
         mineCells2D = new ArrayList<>();
         this.gameData = presenter.GetModel();
@@ -131,11 +133,11 @@ public class View extends JFrame implements MouseListener, ActionListener{
         pane.setLayout(new BorderLayout());
         pane.add(scorePanel, BorderLayout.NORTH);
         pane.add(gamePanel);
-        gamePanel.setLayout(new GridLayout(numRows,numCols));
-        scorePanel.setMines(numMines);
-        for (int curCol = 0; curCol < numCols; curCol++){
+        gamePanel.setLayout(new GridLayout(viewNumRows, viewNumCols));
+        scorePanel.setMines(viewNumMines);
+        for (int curCol = 0; curCol < viewNumCols; curCol++){
             mineCells2D.add(new ArrayList<>());
-            for (int curRow = 0; curRow < numRows; curRow++){
+            for (int curRow = 0; curRow < viewNumRows; curRow++){
                 Cell tmpCell = new Cell();
                 tmpCell.setColumn(curCol);
                 tmpCell.setRow(curRow);
@@ -154,8 +156,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
      */
     public void GameOver(){
         timer.stop();
-        for (int curCol = 0; curCol < numCols; curCol++){
-            for(int curRow = 0; curRow < numRows; curRow++){
+        for (int curCol = 0; curCol < viewNumCols; curCol++){
+            for(int curRow = 0; curRow < viewNumRows; curRow++){
                 mineCells2D.get(curCol).get(curRow).setEnabled(false);
                 if (gameData.IsMine(curCol,curRow)){
                     if (gameData.IsFlag(curCol,curRow)){
@@ -193,7 +195,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     private int ConvertCoordinatesToIndex(int[] coordinates){
-        return coordinates[1]*numCols + coordinates[0];
+        return coordinates[1]* viewNumCols + coordinates[0];
     }
 
     /**
@@ -203,9 +205,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
         int column = theCell.getColumn();
         int row = theCell.getRow();
         boolean prevCol = column - 1 > 0;
-        boolean nextCol = column + 1 < numCols;
+        boolean nextCol = column + 1 < viewNumCols;
         boolean prevRow = row - 1 > 0;
-        boolean nextRow = row + 1 < numRows;
+        boolean nextRow = row + 1 < viewNumRows;
 
         if(prevCol && prevRow){
             sweepCell(mineCells2D.get(column-1).get(row-1), visits);
@@ -244,7 +246,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
         if(gameData.IsFlag(column, row)){ return; }
         List<Boolean> visits = new ArrayList<>();
         //TODO this is where visits is created. Make it 2D.
-        for(int i = 0; i < numRows * numCols; i++){
+        for(int i = 0; i < viewNumRows * viewNumCols; i++){
             visits.add(false);
         }
         sweepCell(clickedCell, visits);
@@ -296,25 +298,25 @@ public class View extends JFrame implements MouseListener, ActionListener{
     private void newGame(){
         time = 0;
         timer.stop();
-        for(int curIndex = 0; curIndex < numRows * numCols; curIndex++){
-            int column = ConvertIndexToCoordinates(curIndex,numCols,numRows)[0];
-            int row = ConvertIndexToCoordinates(curIndex,numCols,numRows)[1];
+        for(int curIndex = 0; curIndex < viewNumRows * viewNumCols; curIndex++){
+            int column = ConvertIndexToCoordinates(curIndex, viewNumCols, viewNumRows)[0];
+            int row = ConvertIndexToCoordinates(curIndex, viewNumCols, viewNumRows)[1];
             gamePanel.remove(0);
             gameData.RemoveFlag(column,row);
             gameData.RemoveQuestionMark(column,row);
         }
 
-        for (int curCol = 0; curCol < numCols; curCol++){
+        for (int curCol = 0; curCol < viewNumCols; curCol++){
             mineCells2D.remove(0);
         }
 
-        for (int curCol = 0; curCol < numCols; curCol++){
+        for (int curCol = 0; curCol < viewNumCols; curCol++){
             mineCells2D.add(new ArrayList<>());
         }
 
-        for(int i = 0; i < numRows * numCols; i++){
-            int column = ConvertIndexToCoordinates(i,numCols,numRows)[0];
-            int row = ConvertIndexToCoordinates(i,numCols,numRows)[1];
+        for(int i = 0; i < viewNumRows * viewNumCols; i++){
+            int column = ConvertIndexToCoordinates(i, viewNumCols, viewNumRows)[0];
+            int row = ConvertIndexToCoordinates(i, viewNumCols, viewNumRows)[1];
             Cell tmpCell = new Cell();
             tmpCell.setColumn(column);
             tmpCell.setRow(row);
@@ -324,6 +326,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
         }
 
         presenter.InitializeField();
+        gamePanel.revalidate();
         update(getGraphics());
     }
 
@@ -337,14 +340,14 @@ public class View extends JFrame implements MouseListener, ActionListener{
             gameData.AddFlag(column,row);
             clickedCell.setImage(flagIcon);
             minesMarked++;
-            scorePanel.setMines(numMines-minesMarked);
+            scorePanel.setMines(viewNumMines -minesMarked);
         }
         else if(gameData.IsFlag(column,row)){
             gameData.AddQuestionMark(column,row);
             gameData.RemoveFlag(column,row);
             clickedCell.setImage(questionIcon);
             minesMarked--;
-            scorePanel.setMines(numMines-minesMarked);
+            scorePanel.setMines(viewNumMines -minesMarked);
         }
         else if(gameData.IsQuestion(column,row)){
             gameData.RemoveQuestionMark(column,row);
