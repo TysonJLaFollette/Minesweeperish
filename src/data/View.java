@@ -29,9 +29,6 @@ import view.ScorePanel;
 //TODO Separate business logic and display logic. Since display logic cannot be extracted individually, maybe extract the business logic instead?
 public class View extends JFrame implements MouseListener, ActionListener{
     //region Properties
-    private int viewNumRows;
-    private int viewNumCols;
-    private int viewNumMines;
 	private int minesMarked;
     public boolean win;
 	private int time = 0;
@@ -43,22 +40,11 @@ public class View extends JFrame implements MouseListener, ActionListener{
     private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
     private ImageIcon flagIcon = new ImageIcon("data/flag.png");
     private ImageIcon questionIcon = new ImageIcon("data/question.png");
-    private ImageIcon oneIcon = new ImageIcon("data/one.png");
-    private ImageIcon twoIcon = new ImageIcon("data/two.png");
-    private ImageIcon threeIcon = new ImageIcon("data/three.png");
-    private ImageIcon fourIcon = new ImageIcon("data/four.png");
-    private ImageIcon fiveIcon = new ImageIcon("data/five.png");
-    private ImageIcon sixIcon = new ImageIcon("data/six.png");
-    private ImageIcon sevenIcon = new ImageIcon("data/seven.png");
-    private ImageIcon eightIcon = new ImageIcon("data/eight.png");
     //endregion
 
     //region Constructors
     public View(Presenter presenter, int viewNumRows, int viewNumCols, int viewNumMines){
         this.presenter = presenter;
-        this.viewNumRows = viewNumRows;
-        this.viewNumCols = viewNumCols;
-        this.viewNumMines = viewNumMines;
         win = false;
         this.gameData = presenter.GetModel();
         InitGraphics();
@@ -129,17 +115,15 @@ public class View extends JFrame implements MouseListener, ActionListener{
         pane.setLayout(new BorderLayout());
         pane.add(scorePanel, BorderLayout.NORTH);
         pane.add(gamePanel);
-        gamePanel.setLayout(new GridLayout(viewNumRows, viewNumCols));
-        scorePanel.setMines(viewNumMines);
-        for (int curCol = 0; curCol < viewNumCols; curCol++){
-            for (int curRow = 0; curRow < viewNumRows; curRow++){
-                Cell tmpCell = new Cell();
-                tmpCell.setColumn(curCol);
-                tmpCell.setRow(curRow);
-                tmpCell.addMouseListener(this);
-                gamePanel.add(tmpCell);
-
-            }
+        gamePanel.setLayout(new GridLayout(presenter.getNumRows(), presenter.getNumCols()));
+        scorePanel.setMines(presenter.getNumMines());
+        for (int curCell = 0; curCell < presenter.getNumCols() * presenter.getNumRows(); curCell++){
+            int[] coords = ConvertIndexToCoordinates(curCell, presenter.getNumCols(), presenter.getNumRows());
+            Cell tmpCell = new Cell();
+            tmpCell.setColumn(coords[0]);
+            tmpCell.setRow(coords[1]);
+            tmpCell.addMouseListener(this);
+            gamePanel.add(tmpCell);
         }
         this.setLocationRelativeTo(null);
         this.setVisible(true);
@@ -150,8 +134,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
      */
     public void GameOver(){
         timer.stop();
-        for (int curCol = 0; curCol < viewNumCols; curCol++){
-            for(int curRow = 0; curRow < viewNumRows; curRow++){
+        for (int curCol = 0; curCol < presenter.getNumCols(); curCol++){
+            for(int curRow = 0; curRow < presenter.getNumRows(); curRow++){
                 gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {curCol, curRow})).setEnabled(false);
                 if (gameData.IsMine(curCol,curRow)){
                     Cell curCell = (Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[]{curCol,curRow}));
@@ -190,7 +174,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     private int ConvertCoordinatesToIndex(int[] coordinates){
-        return coordinates[1]* viewNumCols + coordinates[0];
+        return coordinates[1] * presenter.getNumCols() + coordinates[0];
     }
 
     /**
@@ -200,9 +184,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
         int column = theCell.getColumn();
         int row = theCell.getRow();
         boolean prevCol = column - 1 >= 0;
-        boolean nextCol = column + 1 < viewNumCols;
+        boolean nextCol = column + 1 < presenter.getNumCols();
         boolean prevRow = row - 1 >= 0;
-        boolean nextRow = row + 1 < viewNumRows;
+        boolean nextRow = row + 1 < presenter.getNumRows();
 
         if(prevCol && prevRow){
             sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column-1,row-1})), visits);
@@ -241,7 +225,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
         if(gameData.IsFlag(column, row)){ return; }
         List<Boolean> visits = new ArrayList<>();
         //TODO this is where visits is created. Make it 2D.
-        for(int i = 0; i < viewNumRows * viewNumCols; i++){
+        for(int i = 0; i < presenter.getNumRows() * presenter.getNumCols(); i++){
             visits.add(false);
         }
         sweepCell(clickedCell, visits);
@@ -268,21 +252,21 @@ public class View extends JFrame implements MouseListener, ActionListener{
             } else if (numAdjacent == 0) {
                 caseZero(theCell, visits);
             } else if (numAdjacent == 1){
-                theCell.setIcon(oneIcon);
+                theCell.setText("1");
             } else if (numAdjacent == 2){
-                theCell.setIcon(twoIcon);
+                theCell.setText("2");
             } else if (numAdjacent == 3){
-                theCell.setIcon(threeIcon);
+                theCell.setText("3");
             } else if (numAdjacent == 4){
-                theCell.setIcon(fourIcon);
+                theCell.setText("4");
             } else if (numAdjacent == 5){
-                theCell.setIcon(fiveIcon);
+                theCell.setText("5");
             } else if (numAdjacent == 6) {
-                theCell.setIcon(sixIcon);
+                theCell.setText("6");
             } else if (numAdjacent == 7){
-                theCell.setIcon(sevenIcon);
+                theCell.setText("7");
             } else if (numAdjacent == 8){
-                theCell.setIcon(eightIcon);
+                theCell.setText("8");
             }
         }
     }
@@ -293,30 +277,21 @@ public class View extends JFrame implements MouseListener, ActionListener{
     private void newGame(){
         time = 0;
         timer.stop();
-        for(int curIndex = 0; curIndex < viewNumRows * viewNumCols; curIndex++){
-            int column = ConvertIndexToCoordinates(curIndex, viewNumCols, viewNumRows)[0];
-            int row = ConvertIndexToCoordinates(curIndex, viewNumCols, viewNumRows)[1];
+        for(int curIndex = 0; curIndex < presenter.getNumRows() * presenter.getNumCols(); curIndex++){
+            int column = ConvertIndexToCoordinates(curIndex, presenter.getNumCols(), presenter.getNumRows())[0];
+            int row = ConvertIndexToCoordinates(curIndex, presenter.getNumCols(), presenter.getNumRows())[1];
             gamePanel.remove(0);
             gameData.RemoveFlag(column,row);
             gameData.RemoveQuestionMark(column,row);
         }
 
-        for (int curCol = 0; curCol < viewNumCols; curCol++){
-            //mineCells2D.remove(0);
-        }
-
-        for (int curCol = 0; curCol < viewNumCols; curCol++){
-            //mineCells2D.add(new ArrayList<>());
-        }
-
-        for(int i = 0; i < viewNumRows * viewNumCols; i++){
-            int column = ConvertIndexToCoordinates(i, viewNumCols, viewNumRows)[0];
-            int row = ConvertIndexToCoordinates(i, viewNumCols, viewNumRows)[1];
+        for(int i = 0; i < presenter.getNumRows() * presenter.getNumCols(); i++){
+            int column = ConvertIndexToCoordinates(i, presenter.getNumCols(), presenter.getNumRows())[0];
+            int row = ConvertIndexToCoordinates(i, presenter.getNumCols(), presenter.getNumRows())[1];
             Cell tmpCell = new Cell();
             tmpCell.setColumn(column);
             tmpCell.setRow(row);
             tmpCell.addMouseListener(this);
-            //mineCells2D.get(column).add(tmpCell);
             gamePanel.add(tmpCell);
         }
 
@@ -324,8 +299,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
         gamePanel.revalidate();
         update(getGraphics());
     }
-
-
 
     private void CycleFlags(Cell clickedCell){
         int column = clickedCell.getColumn();
@@ -335,14 +308,14 @@ public class View extends JFrame implements MouseListener, ActionListener{
             gameData.AddFlag(column,row);
             clickedCell.setImage(flagIcon);
             minesMarked++;
-            scorePanel.setMines(viewNumMines -minesMarked);
+            scorePanel.setMines(presenter.getNumMines() - minesMarked);
         }
         else if(gameData.IsFlag(column,row)){
             gameData.AddQuestionMark(column,row);
             gameData.RemoveFlag(column,row);
             clickedCell.setImage(questionIcon);
             minesMarked--;
-            scorePanel.setMines(viewNumMines -minesMarked);
+            scorePanel.setMines(presenter.getNumMines() - minesMarked);
         }
         else if(gameData.IsQuestion(column,row)){
             gameData.RemoveQuestionMark(column,row);

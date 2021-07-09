@@ -22,6 +22,8 @@ public class Presenter {
         this.numRows = numRows;
         this.numMines = numMines;
         this.gameData = new ArrayListModel();
+        gameData.CreateMinefield(numCols, numRows);
+        PlantMines(gameData,numMines);
         this.userInterface = new View(this, numCols, numRows, numMines);
         gameData.CreateMinefield(numCols, numRows);
         PlantMines(gameData,numMines);
@@ -57,6 +59,18 @@ public class Presenter {
             userInterface.win = true;
             userInterface.GameOver();
         }
+    }
+
+    public int getNumCols(){
+        return gameData.GetNumCols();
+    }
+
+    public int getNumRows(){
+        return gameData.GetNumRows();
+    }
+
+    public int getNumMines(){
+        return gameData.GetNumMines();
     }
     //endregion
 
@@ -98,5 +112,6 @@ public class Presenter {
     private int ConvertCoordinatesToIndex(int[] coordinates){
         return coordinates[1]*gameData.GetNumCols() + coordinates[0];
     }
+
     //endregion
 }
