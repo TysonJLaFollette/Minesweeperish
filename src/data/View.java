@@ -21,11 +21,6 @@ import Presenter.Presenter;
 import view.Cell;
 import view.ScorePanel;
 
-/**
- * The MainGame class is only instantiated once. This MainGame object runs and controls everything.
- * It is a JFrame, and listens for the mouse and actions. It is the game window.
- * @author Tyson J LaFollette
- */
 //TODO Separate business logic and display logic. Since display logic cannot be extracted individually, maybe extract the business logic instead?
 public class View extends JFrame implements MouseListener, ActionListener{
     //region Properties
@@ -39,7 +34,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
     private Timer timer = new Timer(1000, this);
     private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
     private ImageIcon flagIcon = new ImageIcon("data/flag.png");
-    private ImageIcon questionIcon = new ImageIcon("data/question.png");
     //endregion
 
     //region Constructors
@@ -52,10 +46,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
     //endregion
 
     //region Public Methods
-    /**
-     * Handles mouse events.
-     * @param arg0 The name of the MouseEvent being handled...?
-     */
     @Override
     public void mouseClicked(MouseEvent arg0) {
         Object source = arg0.getSource();
@@ -82,10 +72,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
     @Override
     public void mouseReleased(MouseEvent e) {}
 
-    /**
-     * Handles generic action events. Primarily used to update game timer.
-     * @param arg0 The name of the ActionEvent being handled.
-     */
     @Override
     public void actionPerformed(ActionEvent arg0) {
         Object source = arg0.getSource();
@@ -101,9 +87,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
     //endregion
 
     //region Private Methods
-    /**
-     * Initializes view components.
-     */
     private void InitGraphics(){
         scorePanel = new ScorePanel(this);
         gamePanel = new JPanel();
@@ -129,9 +112,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
         this.setVisible(true);
     }
 
-    /**
-     * Displays final messages, shows mine locations.
-     */
     public void GameOver(){
         timer.stop();
         for (int curCol = 0; curCol < presenter.getNumCols(); curCol++){
@@ -160,13 +140,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
         }
     }
 
-    /**
-     * Converts a 1D index into 2D coordinates for a minefield of the given dimensions.
-     * @param index The 1D index to convert.
-     * @param numRows The number of rows in the 2D minefield.
-     * @param numCols The number of columns in the 2D minefield.
-     * @return An array containing the vertical and horizontal coordinates the 1D index corresponds to.
-     */
     private int[] ConvertIndexToCoordinates(int index, int numCols, int numRows){
         int row = index / numRows;
         int column = index % numCols;
@@ -177,10 +150,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
         return coordinates[1] * presenter.getNumCols() + coordinates[0];
     }
 
-    /**
-     * Makes many cells reveal themselves if the player clicks on one that has no adjacent mines.
-     */
-    private void caseZero(Cell theCell, List<Boolean> visits){
+    private void caseZero(Cell theCell, ArrayList<ArrayList<Boolean>> visits){
         int column = theCell.getColumn();
         int row = theCell.getRow();
         boolean prevCol = column - 1 >= 0;
@@ -214,36 +184,30 @@ public class View extends JFrame implements MouseListener, ActionListener{
         }
     }
 
-    /**
-     * Starts sweep of cells.
-     * @param clickedCell The Cell object to begin a sweep on.
-     */
     private void startSweep(Cell clickedCell){
         timer.start();
         int column = clickedCell.getColumn();
         int row = clickedCell.getRow();
         if(gameData.IsFlag(column, row)){ return; }
-        List<Boolean> visits = new ArrayList<>();
-        //TODO this is where visits is created. Make it 2D.
-        for(int i = 0; i < presenter.getNumRows() * presenter.getNumCols(); i++){
-            visits.add(false);
+        ArrayList<ArrayList<Boolean>> visits = new ArrayList<ArrayList<Boolean>>();
+        for (int curCol = 0; curCol < presenter.getNumCols(); curCol++){
+            visits.add(new ArrayList<Boolean>());
+            for (int curRow = 0; curRow < presenter.getNumRows(); curRow++){
+                visits.get(curCol).add(false);
+            }
         }
         sweepCell(clickedCell, visits);
     }
 
-    /**
-     * Makes the given Cell reveal its contents. This is called when the player clicks on a Cell.
-     * @param theCell the Cell to reveal.
-     */
-    private void sweepCell(Cell theCell, List<Boolean> visits){
+    private void sweepCell(Cell theCell, ArrayList<ArrayList<Boolean>> visits){
         int column = theCell.getColumn();
         int row = theCell.getRow();
         int index = ConvertCoordinatesToIndex(new int[]{column,row});
         int numAdjacent = gameData.GetNumAdjacent(column,row);
-        if(visits.get(index)){
+        if(visits.get(column).get(row) == true){
             return;
         }
-        visits.set(index, true);
+        visits.get(column).set(row, true);
         if(theCell.isEnabled()){
             theCell.setEnabled(false);
             theCell.setBackground(theCell.getBackground().darker());
@@ -271,9 +235,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
         }
     }
 
-    /**
-     * Starts a new game, resetting values. This is called when the player clicks on the start button.
-     */
     private void newGame(){
         time = 0;
         timer.stop();
@@ -313,13 +274,15 @@ public class View extends JFrame implements MouseListener, ActionListener{
         else if(gameData.IsFlag(column,row)){
             gameData.AddQuestionMark(column,row);
             gameData.RemoveFlag(column,row);
-            clickedCell.setImage(questionIcon);
+            clickedCell.setImage(null);
+            clickedCell.setText("?");
             minesMarked--;
             scorePanel.setMines(presenter.getNumMines() - minesMarked);
         }
         else if(gameData.IsQuestion(column,row)){
             gameData.RemoveQuestionMark(column,row);
             clickedCell.setImage(null);
+            clickedCell.setText("");
         }
     }
     //endregion
