@@ -118,40 +118,127 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void addFlag() {
+        Model gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        assertEquals(false,gameData.IsFlag(0,0));
+        assertEquals(false,gameData.IsFlag(0,1));
+        assertEquals(false,gameData.IsFlag(0,2));
+        gameData.AddFlag(0,0);
+        gameData.AddFlag(0,1);
+        gameData.AddFlag(0,2);
+        assertEquals(true,gameData.IsFlag(0,0));
+        assertEquals(true,gameData.IsFlag(0,1));
+        assertEquals(true,gameData.IsFlag(0,2));
     }
 
     @org.junit.jupiter.api.Test
     void removeFlag() {
-
+        Model gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        gameData.AddFlag(0,0);
+        gameData.AddFlag(0,1);
+        gameData.AddFlag(0,2);
+        assertEquals(true,gameData.IsFlag(0,0));
+        assertEquals(true,gameData.IsFlag(0,1));
+        assertEquals(true,gameData.IsFlag(0,2));
+        gameData.RemoveFlag(0,0);
+        gameData.RemoveFlag(0,1);
+        gameData.RemoveFlag(0,2);
+        assertEquals(false,gameData.IsFlag(0,0));
+        assertEquals(false,gameData.IsFlag(0,1));
+        assertEquals(false,gameData.IsFlag(0,2));
     }
 
     @org.junit.jupiter.api.Test
     void isFlag() {
-
+        Model gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        assertEquals(false,gameData.IsFlag(0,0));
+        assertEquals(false,gameData.IsFlag(0,1));
+        assertEquals(false,gameData.IsFlag(0,2));
+        gameData.AddFlag(0,0);
+        gameData.AddFlag(0,1);
+        gameData.AddFlag(0,2);
+        assertEquals(true,gameData.IsFlag(0,0));
+        assertEquals(true,gameData.IsFlag(0,1));
+        assertEquals(true,gameData.IsFlag(0,2));
     }
 
     @org.junit.jupiter.api.Test
     void addQuestionMark() {
-
+        Model gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        assertEquals(false,gameData.IsQuestion(0,0));
+        assertEquals(false,gameData.IsQuestion(0,1));
+        assertEquals(false,gameData.IsQuestion(0,2));
+        gameData.AddQuestionMark(0,0);
+        gameData.AddQuestionMark(0,1);
+        gameData.AddQuestionMark(0,2);
+        assertEquals(true,gameData.IsQuestion(0,0));
+        assertEquals(true,gameData.IsQuestion(0,1));
+        assertEquals(true,gameData.IsQuestion(0,2));
     }
 
     @org.junit.jupiter.api.Test
     void removeQuestionMark() {
-
+        Model gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        gameData.AddQuestionMark(0,0);
+        gameData.AddQuestionMark(0,1);
+        gameData.AddQuestionMark(0,2);
+        assertEquals(true,gameData.IsQuestion(0,0));
+        assertEquals(true,gameData.IsQuestion(0,1));
+        assertEquals(true,gameData.IsQuestion(0,2));
+        gameData.RemoveQuestionMark(0,0);
+        gameData.RemoveQuestionMark(0,1);
+        gameData.RemoveQuestionMark(0,2);
+        assertEquals(false,gameData.IsQuestion(0,0));
+        assertEquals(false,gameData.IsQuestion(0,1));
+        assertEquals(false,gameData.IsQuestion(0,2));
     }
 
     @org.junit.jupiter.api.Test
     void isQuestion() {
-
+        Model gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        assertEquals(false,gameData.IsQuestion(0,0));
+        assertEquals(false,gameData.IsQuestion(0,1));
+        assertEquals(false,gameData.IsQuestion(0,2));
+        gameData.AddQuestionMark(0,0);
+        gameData.AddQuestionMark(0,1);
+        gameData.AddQuestionMark(0,2);
+        assertEquals(true,gameData.IsQuestion(0,0));
+        assertEquals(true,gameData.IsQuestion(0,1));
+        assertEquals(true,gameData.IsQuestion(0,2));
     }
 
     @org.junit.jupiter.api.Test
     void isSwept() {
-
+        Model gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        assertEquals(false,gameData.IsSwept(0,0));
+        assertEquals(false,gameData.IsSwept(0,1));
+        assertEquals(false,gameData.IsSwept(0,2));
+        gameData.SetSwept(0,0);
+        gameData.SetSwept(0,1);
+        gameData.SetSwept(0,2);
+        assertEquals(true,gameData.IsSwept(0,0));
+        assertEquals(true,gameData.IsSwept(0,1));
+        assertEquals(true,gameData.IsSwept(0,2));
     }
 
     @org.junit.jupiter.api.Test
     void setSwept() {
-
+        Model gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        assertEquals(false,gameData.IsSwept(0,0));
+        assertEquals(false,gameData.IsSwept(0,1));
+        assertEquals(false,gameData.IsSwept(0,2));
+        gameData.SetSwept(0,0);
+        gameData.SetSwept(0,1);
+        gameData.SetSwept(0,2);
+        assertEquals(true,gameData.IsSwept(0,0));
+        assertEquals(true,gameData.IsSwept(0,1));
+        assertEquals(true,gameData.IsSwept(0,2));
     }
 }

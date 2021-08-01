@@ -79,6 +79,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             newGame();
         }
         if(source == timer){
+            //TODO make the presenter keep track of time, and the view only display it.
             time++;
             scorePanel.setTime(time);
         }
@@ -116,9 +117,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
         timer.stop();
         for (int curCol = 0; curCol < presenter.getNumCols(); curCol++){
             for(int curRow = 0; curRow < presenter.getNumRows(); curRow++){
-                gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {curCol, curRow})).setEnabled(false);
+                Cell curCell = (Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[]{curCol,curRow}));
+                curCell.setEnabled(false);
                 if (gameData.IsMine(curCol,curRow)){
-                    Cell curCell = (Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[]{curCol,curRow}));
                     if (gameData.IsFlag(curCol,curRow)){
                         curCell.setBackground(Color.GREEN);
                         curCell.setIcon(mineIcon);
@@ -200,6 +201,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     private void sweepCell(Cell theCell, ArrayList<ArrayList<Boolean>> visits){
+        //TODO make the presenter handle sweeps and cascades.
         int column = theCell.getColumn();
         int row = theCell.getRow();
         int index = ConvertCoordinatesToIndex(new int[]{column,row});
