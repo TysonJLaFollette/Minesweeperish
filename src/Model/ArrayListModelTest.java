@@ -241,4 +241,17 @@ class ArrayListModelTest {
         assertEquals(true,gameData.IsSwept(0,1));
         assertEquals(true,gameData.IsSwept(0,2));
     }
+
+    @org.junit.jupiter.api.Test
+    void plantMines() {
+        ArrayListModel gameData = new ArrayListModel();
+        gameData.CreateMinefield(24,24);
+        gameData.PlantMines(5);
+        int countedMines = gameData.mineLocations.stream().mapToInt(
+                column -> column.stream().mapToInt(
+                        cell -> cell ? 1 : 0).sum()
+                ).sum();
+
+        assertEquals(5, countedMines);
+    }
 }

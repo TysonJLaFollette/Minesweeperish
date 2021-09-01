@@ -257,7 +257,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             gamePanel.add(tmpCell);
         }
 
-        presenter.InitializeField();
+        gameData.InitializeField();
         gamePanel.revalidate();
         update(getGraphics());
     }

@@ -1,6 +1,7 @@
 package Model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ArrayListModel {
     //region Properties
@@ -140,5 +141,46 @@ public class ArrayListModel {
             int curValue = adjacencyCounts.get(column + 1).get(row + 1);
             adjacencyCounts.get(column + 1).set(row + 1,curValue + 1);
         }
+    }
+
+    /**
+     * Creates a minefield with the desired number of mines.
+     */
+    public void InitializeField(){
+        CreateMinefield(numRows, numCols);
+        PlantMines(numMines);
+    }
+
+    /**
+     * Plants the desired number of mines randomly within the given minefield.
+     * @param numMines The number of mines to place.
+     */
+    public void PlantMines(int numMines){
+        ArrayList<Boolean> listToShuffle = new ArrayList<>();
+        for (int i = 0; i < GetNumRows()*GetNumCols(); i++){
+            boolean cellValue = i < numMines;
+            listToShuffle.add(cellValue);
+        }
+        Collections.shuffle(listToShuffle);
+        for (int curIndex = 0; curIndex < GetNumRows()*GetNumCols(); curIndex++){
+            if (listToShuffle.get(curIndex)){
+                int row = ConvertIndexToCoordinates(curIndex, GetNumCols(),GetNumRows())[1];
+                int column = ConvertIndexToCoordinates(curIndex, GetNumCols(),GetNumRows())[0];
+                AddMine(column,row);
+            }
+        }
+    }
+
+    /**
+     * Converts a 1D index into 2D coordinates for a minefield of the given dimensions.
+     * @param index The 1D index to convert.
+     * @param numRows The number of rows in the 2D minefield.
+     * @param numCols The number of columns in the 2D minefield.
+     * @return An array containing the vertical and horizontal coordinates the 1D index corresponds to.
+     */
+    private int[] ConvertIndexToCoordinates(int index, int numCols, int numRows){
+        int row = index / numRows;
+        int column = index % numCols;
+        return new int[] {column, row};
     }
 }
