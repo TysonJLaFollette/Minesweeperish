@@ -1,6 +1,5 @@
 package Presenter;
 
-import Model.Model;
 import Model.ArrayListModel;
 import data.View;
 
@@ -9,7 +8,7 @@ import java.util.Collections;
 
 public class Presenter {
     //region Properties
-    private Model gameData;
+    private ArrayListModel gameData;
     private View userInterface;
     private int numCols;
     private int numRows;
@@ -31,7 +30,7 @@ public class Presenter {
     //endregion
 
     //region Public Methods
-    public Model GetModel(){
+    public ArrayListModel GetModel(){
         return gameData;
     }
 
@@ -80,7 +79,7 @@ public class Presenter {
      * @param gameData The Model containing the minefield.
      * @param numMines The number of mines to place.
      */
-    private void PlantMines(Model gameData, int numMines){
+    private void PlantMines(ArrayListModel gameData, int numMines){
         ArrayList<Boolean> listToShuffle = new ArrayList<>();
         for (int i = 0; i < gameData.GetNumRows()*gameData.GetNumCols(); i++){
             boolean cellValue = i < numMines;

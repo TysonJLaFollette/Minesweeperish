@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -16,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import Model.Model;
+import Model.ArrayListModel;
 import Presenter.Presenter;
 import view.Cell;
 import view.ScorePanel;
@@ -29,7 +28,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
 	private int time = 0;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
-	private Model gameData;
+	private ArrayListModel gameData;
 	private Presenter presenter;
     private Timer timer = new Timer(1000, this);
     private ImageIcon mineIcon = new ImageIcon("data/mine.gif");

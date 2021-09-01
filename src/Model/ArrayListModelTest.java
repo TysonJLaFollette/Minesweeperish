@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ArrayListModelTest {
     @org.junit.jupiter.api.Test
     void createMinefield() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(24, gameData.GetNumRows());
         assertEquals(24,gameData.GetNumCols());
@@ -15,21 +15,21 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void getNumRows() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(24,gameData.GetNumRows());
     }
 
     @org.junit.jupiter.api.Test
     void getNumCols() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(24,gameData.GetNumCols());
     }
 
     @org.junit.jupiter.api.Test
     void addMine() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         gameData.AddMine(0,0);
         gameData.AddMine(23,23);
@@ -39,7 +39,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void isMine() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         gameData.AddMine(1,1);
         assertFalse(gameData.IsMine(0, 0));
@@ -48,7 +48,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void getNumMines() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(0,gameData.GetNumMines());
         gameData.AddMine(0,0);
@@ -59,7 +59,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void incrementAdjacencies() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         gameData.AddMine(0,0);
         gameData.AddMine(0,1);
@@ -73,7 +73,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void getNumAdjacent() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(3,3);
         gameData.AddMine(1,1);
         assertEquals(1, gameData.GetNumAdjacent(0,0));
@@ -118,7 +118,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void addFlag() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(false,gameData.IsFlag(0,0));
         assertEquals(false,gameData.IsFlag(0,1));
@@ -133,7 +133,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void removeFlag() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         gameData.AddFlag(0,0);
         gameData.AddFlag(0,1);
@@ -151,7 +151,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void isFlag() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(false,gameData.IsFlag(0,0));
         assertEquals(false,gameData.IsFlag(0,1));
@@ -166,7 +166,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void addQuestionMark() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(false,gameData.IsQuestion(0,0));
         assertEquals(false,gameData.IsQuestion(0,1));
@@ -181,7 +181,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void removeQuestionMark() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         gameData.AddQuestionMark(0,0);
         gameData.AddQuestionMark(0,1);
@@ -199,7 +199,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void isQuestion() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(false,gameData.IsQuestion(0,0));
         assertEquals(false,gameData.IsQuestion(0,1));
@@ -214,7 +214,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void isSwept() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(false,gameData.IsSwept(0,0));
         assertEquals(false,gameData.IsSwept(0,1));
@@ -229,7 +229,7 @@ class ArrayListModelTest {
 
     @org.junit.jupiter.api.Test
     void setSwept() {
-        Model gameData = new ArrayListModel();
+        ArrayListModel gameData = new ArrayListModel();
         gameData.CreateMinefield(24,24);
         assertEquals(false,gameData.IsSwept(0,0));
         assertEquals(false,gameData.IsSwept(0,1));

@@ -2,7 +2,7 @@ package Model;
 
 import java.util.ArrayList;
 
-public class ArrayListModel implements Model {
+public class ArrayListModel {
     //region Properties
     ArrayList<ArrayList<Boolean>> mineLocations;
     ArrayList<ArrayList<Boolean>> flagLocations;
@@ -25,77 +25,62 @@ public class ArrayListModel implements Model {
         this.adjacencyCounts = new ArrayList<>();
     }
 
-    @Override
     public int GetNumRows() {
         return numRows;
     }
 
-    @Override
     public int GetNumCols() { return numCols; }
 
-    @Override
     public int GetNumMines() {
         return numMines;
     }
 
-    @Override
     public void AddMine(int column, int row) {
         mineLocations.get(column).set(row,true);
         IncrementAdjacencies(column, row);
         numMines += 1;
     }
 
-    @Override
     public void AddFlag(int column, int row) {
         flagLocations.get(column).set(row,true);
     }
 
-    @Override
     public void RemoveFlag(int column, int row) {
         flagLocations.get(column).set(row,false);
     }
 
-    @Override
     public boolean IsFlag(int column, int row) {
         return flagLocations.get(column).get(row);
     }
 
-    @Override
     public void AddQuestionMark(int column, int row) {
         questionLocations.get(column).set(row, true);
     }
 
-    @Override
     public void RemoveQuestionMark(int column, int row) {
         questionLocations.get(column).set(row,false);
     }
 
-    @Override
     public boolean IsQuestion(int column, int row) {
         return questionLocations.get(column).get(row);
     }
 
-    @Override
     public boolean IsMine(int column, int row) {
         return mineLocations.get(column).get(row);
     }
 
-    @Override
     public int GetNumAdjacent(int column, int row) {
         return adjacencyCounts.get(column).get(row);
     }
 
-    @Override
     public boolean IsSwept(int column, int row) {
         return sweptLocations.get(column).get(row);
     }
 
-    @Override
     public void SetSwept(int column, int row) {
         sweptLocations.get(column).set(row, true);
     }
 
-    @Override
     public void CreateMinefield(int numCols, int numRows) {
         this.numCols = numCols;
         this.numRows = numRows;
@@ -122,7 +107,6 @@ public class ArrayListModel implements Model {
         }
     }
 
-    @Override
     public void IncrementAdjacencies(int column, int row) {
         if (column - 1 >= 0 && row - 1 >= 0){
             int curValue = adjacencyCounts.get(column - 1).get(row - 1);
