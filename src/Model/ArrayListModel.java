@@ -183,4 +183,8 @@ public class ArrayListModel {
         int column = index % numCols;
         return new int[] {column, row};
     }
+
+    private int ConvertCoordinatesToIndex(int[] coordinates){
+        return coordinates[1]*GetNumCols() + coordinates[0];
+    }
 }

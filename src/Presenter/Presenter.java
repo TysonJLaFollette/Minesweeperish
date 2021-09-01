@@ -65,24 +65,5 @@ public class Presenter {
     //endregion
 
     //region Private Methods
-
-
-    /**
-     * Converts a 1D index into 2D coordinates for a minefield of the given dimensions.
-     * @param index The 1D index to convert.
-     * @param numRows The number of rows in the 2D minefield.
-     * @param numCols The number of columns in the 2D minefield.
-     * @return An array containing the vertical and horizontal coordinates the 1D index corresponds to.
-     */
-    private int[] ConvertIndexToCoordinates(int index, int numCols, int numRows){
-        int row = index / numRows;
-        int column = index % numCols;
-        return new int[] {column, row};
-    }
-
-    private int ConvertCoordinatesToIndex(int[] coordinates){
-        return coordinates[1]*gameData.GetNumCols() + coordinates[0];
-    }
-
     //endregion
 }
