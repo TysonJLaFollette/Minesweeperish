@@ -24,16 +24,7 @@ public class Model implements ActionListener {
     //endregion
 
     public Model(){
-        this.numMines = 0;
-        this.numCols = 0;
-        this.numRows = 0;
-        this.mineLocations = new ArrayList<>();
-        this.flagLocations = new ArrayList<>();
-        this.questionLocations = new ArrayList<>();
-        this.sweptLocations = new ArrayList<>();
-        this.adjacencyCounts = new ArrayList<>();
-        this.userInterface = new View(this);
-        timer.start();
+        this(24,24,100);
     }
 
     public Model(int numCols, int numRows, int numMines){
