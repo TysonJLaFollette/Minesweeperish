@@ -1,4 +1,4 @@
-import Presenter.Presenter;
+import Model.ArrayListModel;
 
 import javax.swing.*;
 
@@ -8,6 +8,6 @@ public class Game {
      * @param args command line arguments.
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Presenter(24,24,100));
+        SwingUtilities.invokeLater(() -> new ArrayListModel(24,24,100));
     }
 }

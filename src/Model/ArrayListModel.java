@@ -1,5 +1,7 @@
 package Model;
 
+import data.View;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -10,6 +12,7 @@ public class ArrayListModel {
     ArrayList<ArrayList<Boolean>> questionLocations;
     ArrayList<ArrayList<Boolean>> sweptLocations;
     ArrayList<ArrayList<Integer>> adjacencyCounts;
+    private View userInterface;
     int numRows;
     int numCols;
     int numMines;
@@ -24,6 +27,20 @@ public class ArrayListModel {
         this.questionLocations = new ArrayList<>();
         this.sweptLocations = new ArrayList<>();
         this.adjacencyCounts = new ArrayList<>();
+        this.userInterface = new View(this, numCols, numRows, numMines);
+    }
+
+    public ArrayListModel(int numCols, int numRows, int numMines){
+        this.numMines = numMines;
+        this.numCols = numCols;
+        this.numRows = numRows;
+        this.mineLocations = new ArrayList<>();
+        this.flagLocations = new ArrayList<>();
+        this.questionLocations = new ArrayList<>();
+        this.sweptLocations = new ArrayList<>();
+        this.adjacencyCounts = new ArrayList<>();
+        InitializeField(numRows, numCols, numMines);
+        this.userInterface = new View(this, numCols, numRows, numMines);
     }
 
     public int GetNumRows() {
@@ -186,5 +203,23 @@ public class ArrayListModel {
 
     private int ConvertCoordinatesToIndex(int[] coordinates){
         return coordinates[1]*GetNumCols() + coordinates[0];
+    }
+
+    /**
+     * Checks whether the player has won each time they press a cell.
+     */
+    public void flagCheck(){
+        int minesRight = 0;
+        for (int curCol = 0; curCol < numCols; curCol++){
+            for (int curRow = 0; curRow < numRows; curRow++){
+                if (IsMine(curCol,curRow) && IsFlag(curCol,curRow)){
+                    minesRight++;
+                }
+            }
+        }
+        if(minesRight == numMines){
+            userInterface.win = true;
+            userInterface.GameOver();
+        }
     }
 }

@@ -16,7 +16,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import Model.ArrayListModel;
-import Presenter.Presenter;
 import view.Cell;
 import view.ScorePanel;
 
@@ -29,17 +28,15 @@ public class View extends JFrame implements MouseListener, ActionListener{
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
 	private ArrayListModel gameData;
-	private Presenter presenter;
     private Timer timer = new Timer(1000, this);
     private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
     private ImageIcon flagIcon = new ImageIcon("data/flag.png");
     //endregion
 
     //region Constructors
-    public View(Presenter presenter, int viewNumRows, int viewNumCols, int viewNumMines){
-        this.presenter = presenter;
+    public View(ArrayListModel gameData, int viewNumRows, int viewNumCols, int viewNumMines){
+        this.gameData = gameData;
         win = false;
-        this.gameData = presenter.GetModel();
         InitGraphics();
     }
     //endregion
@@ -56,7 +53,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
         } else if(SwingUtilities.isRightMouseButton(arg0)){
             CycleFlags(clickedCell);
         }
-        presenter.flagCheck();
+        gameData.flagCheck();
     }
 
     @Override
