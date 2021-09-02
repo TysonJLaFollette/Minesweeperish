@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
-import Model.ArrayListModel;
+import Model.Model;
 import view.Cell;
 import view.ScorePanel;
 
@@ -27,14 +27,14 @@ public class View extends JFrame implements MouseListener, ActionListener{
 	private int time = 0;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
-	private ArrayListModel gameData;
-    private Timer timer = new Timer(1000, this);
-    private ImageIcon mineIcon = new ImageIcon("data/mine.gif");
-    private ImageIcon flagIcon = new ImageIcon("data/flag.png");
+	private final Model gameData;
+    private final Timer timer = new Timer(1000, this);
+    private final ImageIcon mineIcon = new ImageIcon("data/mine.gif");
+    private final ImageIcon flagIcon = new ImageIcon("data/flag.png");
     //endregion
 
     //region Constructors
-    public View(ArrayListModel gameData, int viewNumRows, int viewNumCols, int viewNumMines){
+    public View(Model gameData){
         this.gameData = gameData;
         win = false;
         InitGraphics();
@@ -186,9 +186,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
         int column = clickedCell.getColumn();
         int row = clickedCell.getRow();
         if(gameData.IsFlag(column, row)){ return; }
-        ArrayList<ArrayList<Boolean>> visits = new ArrayList<ArrayList<Boolean>>();
+        ArrayList<ArrayList<Boolean>> visits = new ArrayList<>();
         for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
-            visits.add(new ArrayList<Boolean>());
+            visits.add(new ArrayList<>());
             for (int curRow = 0; curRow < gameData.GetNumRows(); curRow++){
                 visits.get(curCol).add(false);
             }
@@ -200,9 +200,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
         //TODO make the presenter handle sweeps and cascades.
         int column = theCell.getColumn();
         int row = theCell.getRow();
-        int index = ConvertCoordinatesToIndex(new int[]{column,row});
         int numAdjacent = gameData.GetNumAdjacent(column,row);
-        if(visits.get(column).get(row) == true){
+        if(visits.get(column).get(row)){
             return;
         }
         visits.get(column).set(row, true);

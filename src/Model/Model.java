@@ -5,20 +5,20 @@ import data.View;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class ArrayListModel {
+public class Model {
     //region Properties
     ArrayList<ArrayList<Boolean>> mineLocations;
     ArrayList<ArrayList<Boolean>> flagLocations;
     ArrayList<ArrayList<Boolean>> questionLocations;
     ArrayList<ArrayList<Boolean>> sweptLocations;
     ArrayList<ArrayList<Integer>> adjacencyCounts;
-    private View userInterface;
+    private final View userInterface;
     int numRows;
     int numCols;
     int numMines;
     //endregion
 
-    public ArrayListModel(){
+    public Model(){
         this.numMines = 0;
         this.numCols = 0;
         this.numRows = 0;
@@ -27,10 +27,10 @@ public class ArrayListModel {
         this.questionLocations = new ArrayList<>();
         this.sweptLocations = new ArrayList<>();
         this.adjacencyCounts = new ArrayList<>();
-        this.userInterface = new View(this, numCols, numRows, numMines);
+        this.userInterface = new View(this);
     }
 
-    public ArrayListModel(int numCols, int numRows, int numMines){
+    public Model(int numCols, int numRows, int numMines){
         this.numMines = numMines;
         this.numCols = numCols;
         this.numRows = numRows;
@@ -40,7 +40,7 @@ public class ArrayListModel {
         this.sweptLocations = new ArrayList<>();
         this.adjacencyCounts = new ArrayList<>();
         InitializeField(numRows, numCols, numMines);
-        this.userInterface = new View(this, numCols, numRows, numMines);
+        this.userInterface = new View(this);
     }
 
     public int GetNumRows() {
@@ -103,18 +103,18 @@ public class ArrayListModel {
         this.numCols = numCols;
         this.numRows = numRows;
         this.numMines = 0;
-        mineLocations = new ArrayList<ArrayList<Boolean>>();
-        flagLocations = new ArrayList<ArrayList<Boolean>>();
-        sweptLocations = new ArrayList<ArrayList<Boolean>>();
+        mineLocations = new ArrayList<>();
+        flagLocations = new ArrayList<>();
+        sweptLocations = new ArrayList<>();
         questionLocations = new ArrayList<>();
-        adjacencyCounts = new ArrayList<ArrayList<Integer>>();
+        adjacencyCounts = new ArrayList<>();
 
         for(int curCol = 0; curCol < numCols; curCol++){
-            mineLocations.add(new ArrayList<Boolean>());
-            flagLocations.add(new ArrayList<Boolean>());
-            sweptLocations.add(new ArrayList<Boolean>());
+            mineLocations.add(new ArrayList<>());
+            flagLocations.add(new ArrayList<>());
+            sweptLocations.add(new ArrayList<>());
             questionLocations.add(new ArrayList<>());
-            adjacencyCounts.add(new ArrayList<Integer>());
+            adjacencyCounts.add(new ArrayList<>());
             for(int curRow = 0; curRow < numRows; curRow++){
                 mineLocations.get(curCol).add(false);
                 flagLocations.get(curCol).add(false);
@@ -199,10 +199,6 @@ public class ArrayListModel {
         int row = index / numRows;
         int column = index % numCols;
         return new int[] {column, row};
-    }
-
-    private int ConvertCoordinatesToIndex(int[] coordinates){
-        return coordinates[1]*GetNumCols() + coordinates[0];
     }
 
     /**
