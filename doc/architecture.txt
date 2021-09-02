@@ -1,0 +1,51 @@
+@startuml
+
+note as ViewNote
+    The view defines a graphical interface.
+    Only display logic.
+    Links user events to Presenter functions.
+    Obeys the presenter.
+end note
+
+package "View" {
+    () GraphicalInterface - [UserEvents]
+    () GraphicalInterfaceAPI - [Graphics]
+}
+
+ViewNote . View
+
+note as PresenterNote
+    The Presenter defines what a player can do.
+    Contains functions, but not persistent state.
+    It contains action functions like 'SweepCell()' and 'FlagCell()'.
+    Uses GraphicalInterfaceAPI to update the user interface
+    Uses ModelInterface to modify game state.
+end note
+
+package "Presenter" {
+    [UserActionFunctions]
+    () PresenterInterface
+    [UserActionFunctions] - PresenterInterface
+    [UserEvents] --> PresenterInterface
+    [UserActionFunctions] --> [GraphicalInterfaceAPI]
+}
+
+PresenterNote . Presenter
+
+note as ModelNote
+    The Model.Model contains the game's state.
+    Has several 2D Lists, with interaction functions.
+    Functions are abstracted, not revealing their inner workings to Presenter.
+end note
+
+package "Model.Model" {
+    () ModelInterface
+    [UserActionFunctions] <--> ModelInterface
+    ModelInterface -- [MineLocations]
+    ModelInterface -- [FlagLocations]
+    ModelInterface -- [SweptLocations]
+    ModelInterface -- [AdjacencyCounts]
+}
+
+ModelNote . Model.Model
+@enduml

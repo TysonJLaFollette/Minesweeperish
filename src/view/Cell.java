@@ -1,14 +1,8 @@
-/**
- * 
- */
 package view;
 
-import java.awt.Color;
+import java.awt.*;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 /**
  * Cells are JButtons that populate the minefield. They are the square regions that can either contain a mine or not.
@@ -16,34 +10,36 @@ import javax.swing.JPanel;
  * @author Tyson
  */
 public class Cell extends JButton{
+	private int column;
 
-	/**
-	 * Each Cell is identified by a unique index number.
-	 */
-	private int index;
+	private int row;
 
 	/**
 	 * Sets default parameters for the Cell.
 	 */
 	public Cell(){
-		index = -1;
+		column = -1;
+		row = -1;
 		this.setSize(50, 50);
+		this.setFont(new Font("Serif", Font.ITALIC, 14));
+		this.setMargin(new Insets(0, 0, 0, 0));
+		this.setForeground(Color.BLACK);
 	}
 
-	/**
-     * Returns the Cell's unique index number.
-	 * @return A unique index number for this Cell.
-	 */
-	public int getIndex(){
-		return index;
+	public int getRow() {
+		return row;
 	}
 
-	/**
-     * Sets the Cell's unique index number.
-	 * @param newIndex A unique number to identify this Cell.
-	 */
-	public void setIndex(int newIndex){
-		index = newIndex;
+	public void setRow(int row) {
+		this.row = row;
+	}
+
+	public int getColumn() {
+		return column;
+	}
+
+	public void setColumn(int column) {
+		this.column = column;
 	}
 
 	/**
