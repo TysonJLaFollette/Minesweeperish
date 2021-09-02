@@ -212,22 +212,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
                 GameOver();
             } else if (numAdjacent == 0) {
                 caseZero(theCell, visits);
-            } else if (numAdjacent == 1){
-                theCell.setText("1");
-            } else if (numAdjacent == 2){
-                theCell.setText("2");
-            } else if (numAdjacent == 3){
-                theCell.setText("3");
-            } else if (numAdjacent == 4){
-                theCell.setText("4");
-            } else if (numAdjacent == 5){
-                theCell.setText("5");
-            } else if (numAdjacent == 6) {
-                theCell.setText("6");
-            } else if (numAdjacent == 7){
-                theCell.setText("7");
-            } else if (numAdjacent == 8){
-                theCell.setText("8");
+            } else {
+                theCell.setText(Integer.toString(numAdjacent));
             }
         }
     }
