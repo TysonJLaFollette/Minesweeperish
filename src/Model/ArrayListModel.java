@@ -146,7 +146,7 @@ public class ArrayListModel {
     /**
      * Creates a minefield with the desired number of mines.
      */
-    public void InitializeField(){
+    public void InitializeField(int numRows, int numCols, int numMines){
         CreateMinefield(numRows, numCols);
         PlantMines(numMines);
     }

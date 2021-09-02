@@ -98,10 +98,10 @@ public class View extends JFrame implements MouseListener, ActionListener{
         pane.setLayout(new BorderLayout());
         pane.add(scorePanel, BorderLayout.NORTH);
         pane.add(gamePanel);
-        gamePanel.setLayout(new GridLayout(presenter.getNumRows(), presenter.getNumCols()));
-        scorePanel.setMines(presenter.getNumMines());
-        for (int curCell = 0; curCell < presenter.getNumCols() * presenter.getNumRows(); curCell++){
-            int[] coords = ConvertIndexToCoordinates(curCell, presenter.getNumCols(), presenter.getNumRows());
+        gamePanel.setLayout(new GridLayout(gameData.GetNumRows(), gameData.GetNumCols()));
+        scorePanel.setMines(gameData.GetNumMines());
+        for (int curCell = 0; curCell < gameData.GetNumCols() * gameData.GetNumRows(); curCell++){
+            int[] coords = ConvertIndexToCoordinates(curCell, gameData.GetNumCols(), gameData.GetNumRows());
             Cell tmpCell = new Cell();
             tmpCell.setColumn(coords[0]);
             tmpCell.setRow(coords[1]);
@@ -114,8 +114,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
 
     public void GameOver(){
         timer.stop();
-        for (int curCol = 0; curCol < presenter.getNumCols(); curCol++){
-            for(int curRow = 0; curRow < presenter.getNumRows(); curRow++){
+        for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
+            for(int curRow = 0; curRow < gameData.GetNumRows(); curRow++){
                 Cell curCell = (Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[]{curCol,curRow}));
                 curCell.setEnabled(false);
                 if (gameData.IsMine(curCol,curRow)){
@@ -147,16 +147,16 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     private int ConvertCoordinatesToIndex(int[] coordinates){
-        return coordinates[1] * presenter.getNumCols() + coordinates[0];
+        return coordinates[1] * gameData.GetNumCols() + coordinates[0];
     }
 
     private void caseZero(Cell theCell, ArrayList<ArrayList<Boolean>> visits){
         int column = theCell.getColumn();
         int row = theCell.getRow();
         boolean prevCol = column - 1 >= 0;
-        boolean nextCol = column + 1 < presenter.getNumCols();
+        boolean nextCol = column + 1 < gameData.GetNumCols();
         boolean prevRow = row - 1 >= 0;
-        boolean nextRow = row + 1 < presenter.getNumRows();
+        boolean nextRow = row + 1 < gameData.GetNumRows();
 
         if(prevCol && prevRow){
             sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column-1,row-1})), visits);
@@ -190,9 +190,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
         int row = clickedCell.getRow();
         if(gameData.IsFlag(column, row)){ return; }
         ArrayList<ArrayList<Boolean>> visits = new ArrayList<ArrayList<Boolean>>();
-        for (int curCol = 0; curCol < presenter.getNumCols(); curCol++){
+        for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
             visits.add(new ArrayList<Boolean>());
-            for (int curRow = 0; curRow < presenter.getNumRows(); curRow++){
+            for (int curRow = 0; curRow < gameData.GetNumRows(); curRow++){
                 visits.get(curCol).add(false);
             }
         }
@@ -239,17 +239,17 @@ public class View extends JFrame implements MouseListener, ActionListener{
     private void newGame(){
         time = 0;
         timer.stop();
-        for(int curIndex = 0; curIndex < presenter.getNumRows() * presenter.getNumCols(); curIndex++){
-            int column = ConvertIndexToCoordinates(curIndex, presenter.getNumCols(), presenter.getNumRows())[0];
-            int row = ConvertIndexToCoordinates(curIndex, presenter.getNumCols(), presenter.getNumRows())[1];
+        for(int curIndex = 0; curIndex < gameData.GetNumRows() * gameData.GetNumCols(); curIndex++){
+            int column = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
+            int row = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
             gamePanel.remove(0);
             gameData.RemoveFlag(column,row);
             gameData.RemoveQuestionMark(column,row);
         }
 
-        for(int i = 0; i < presenter.getNumRows() * presenter.getNumCols(); i++){
-            int column = ConvertIndexToCoordinates(i, presenter.getNumCols(), presenter.getNumRows())[0];
-            int row = ConvertIndexToCoordinates(i, presenter.getNumCols(), presenter.getNumRows())[1];
+        for(int i = 0; i < gameData.GetNumRows() * gameData.GetNumCols(); i++){
+            int column = ConvertIndexToCoordinates(i, gameData.GetNumCols(), gameData.GetNumRows())[0];
+            int row = ConvertIndexToCoordinates(i, gameData.GetNumCols(), gameData.GetNumRows())[1];
             Cell tmpCell = new Cell();
             tmpCell.setColumn(column);
             tmpCell.setRow(row);
@@ -257,7 +257,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             gamePanel.add(tmpCell);
         }
 
-        gameData.InitializeField();
+        gameData.InitializeField(24,24, 100);
         gamePanel.revalidate();
         update(getGraphics());
     }
@@ -270,7 +270,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             gameData.AddFlag(column,row);
             clickedCell.setImage(flagIcon);
             minesMarked++;
-            scorePanel.setMines(presenter.getNumMines() - minesMarked);
+            scorePanel.setMines(gameData.GetNumMines() - minesMarked);
         }
         else if(gameData.IsFlag(column,row)){
             gameData.AddQuestionMark(column,row);
@@ -278,7 +278,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             clickedCell.setImage(null);
             clickedCell.setText("?");
             minesMarked--;
-            scorePanel.setMines(presenter.getNumMines() - minesMarked);
+            scorePanel.setMines(gameData.GetNumMines() - minesMarked);
         }
         else if(gameData.IsQuestion(column,row)){
             gameData.RemoveQuestionMark(column,row);
