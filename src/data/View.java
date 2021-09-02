@@ -24,11 +24,10 @@ public class View extends JFrame implements MouseListener, ActionListener{
     //region Properties
 	private int minesMarked;
     public boolean win;
-	private int time = 0;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
 	private final Model gameData;
-    private final Timer timer = new Timer(1000, this);
+    private final Timer timer = new Timer(200, this);
     private final ImageIcon mineIcon = new ImageIcon("data/mine.gif");
     private final ImageIcon flagIcon = new ImageIcon("data/flag.png");
     //endregion
@@ -75,9 +74,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             newGame();
         }
         if(source == timer){
-            //TODO make the presenter keep track of time, and the view only display it.
-            time++;
-            scorePanel.setTime(time);
+            scorePanel.setTime(gameData.getGameDuration());
         }
 
     }
@@ -130,7 +127,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             }
         }
         if(win){
-            JOptionPane.showMessageDialog(null,"End! Your time was " + time + " seconds.");
+            JOptionPane.showMessageDialog(null,"End! Your time was " + gameData.getGameDuration() + " seconds.");
         }
         else{
             JOptionPane.showMessageDialog(null,"End!");
@@ -235,7 +232,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     private void newGame(){
-        time = 0;
         timer.stop();
         for(int curIndex = 0; curIndex < gameData.GetNumRows() * gameData.GetNumCols(); curIndex++){
             int column = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];

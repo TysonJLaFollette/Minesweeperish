@@ -2,10 +2,13 @@ package Model;
 
 import data.View;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Model {
+public class Model implements ActionListener {
     //region Properties
     ArrayList<ArrayList<Boolean>> mineLocations;
     ArrayList<ArrayList<Boolean>> flagLocations;
@@ -16,6 +19,8 @@ public class Model {
     int numRows;
     int numCols;
     int numMines;
+    int gameDuration = 0;
+    private final Timer timer = new Timer(1000, this);
     //endregion
 
     public Model(){
@@ -28,6 +33,7 @@ public class Model {
         this.sweptLocations = new ArrayList<>();
         this.adjacencyCounts = new ArrayList<>();
         this.userInterface = new View(this);
+        timer.start();
     }
 
     public Model(int numCols, int numRows, int numMines){
@@ -41,6 +47,7 @@ public class Model {
         this.adjacencyCounts = new ArrayList<>();
         InitializeField(numRows, numCols, numMines);
         this.userInterface = new View(this);
+        timer.start();
     }
 
     public int GetNumRows() {
@@ -166,6 +173,7 @@ public class Model {
     public void InitializeField(int numRows, int numCols, int numMines){
         CreateMinefield(numRows, numCols);
         PlantMines(numMines);
+        gameDuration = 0;
     }
 
     /**
@@ -217,5 +225,17 @@ public class Model {
             userInterface.win = true;
             userInterface.GameOver();
         }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object source = e.getSource();
+        if(source == timer){
+            gameDuration++;
+        }
+    }
+
+    public int getGameDuration(){
+        return gameDuration;
     }
 }
