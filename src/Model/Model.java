@@ -20,6 +20,8 @@ public class Model implements ActionListener {
     int numCols;
     int numMines;
     int gameDuration = 0;
+    private boolean gameIsOver = true;
+    private boolean playerVictorious = false;
     private final Timer timer = new Timer(1000, this);
     //endregion
 
@@ -164,6 +166,7 @@ public class Model implements ActionListener {
     public void InitializeField(int numRows, int numCols, int numMines){
         CreateMinefield(numRows, numCols);
         PlantMines(numMines);
+        gameIsOver = false;
         gameDuration = 0;
     }
 
@@ -213,8 +216,8 @@ public class Model implements ActionListener {
             }
         }
         if(minesRight == numMines){
-            userInterface.win = true;
-            userInterface.GameOver();
+            playerVictorious = true;
+            gameIsOver = true;
         }
     }
 
@@ -228,5 +231,13 @@ public class Model implements ActionListener {
 
     public int getGameDuration(){
         return gameDuration;
+    }
+
+    public boolean isTheGameOver(){
+        return gameIsOver;
+    }
+
+    public boolean didPlayerWin(){
+        return playerVictorious;
     }
 }

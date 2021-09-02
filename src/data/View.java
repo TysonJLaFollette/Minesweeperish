@@ -19,11 +19,9 @@ import Model.Model;
 import view.Cell;
 import view.ScorePanel;
 
-//TODO Separate business logic and display logic. Since display logic cannot be extracted individually, maybe extract the business logic instead?
 public class View extends JFrame implements MouseListener, ActionListener{
     //region Properties
 	private int minesMarked;
-    public boolean win;
 	private ScorePanel scorePanel;
 	private JPanel gamePanel;
 	private final Model gameData;
@@ -35,7 +33,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
     //region Constructors
     public View(Model gameData){
         this.gameData = gameData;
-        win = false;
         InitGraphics();
     }
     //endregion
@@ -53,6 +50,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
             CycleFlags(clickedCell);
         }
         gameData.flagCheck();
+        if (gameData.isTheGameOver()){
+            GameOver();
+        }
     }
 
     @Override
@@ -126,7 +126,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
                 }
             }
         }
-        if(win){
+        if(gameData.didPlayerWin()){
             JOptionPane.showMessageDialog(null,"End! Your time was " + gameData.getGameDuration() + " seconds.");
         }
         else{
@@ -222,6 +222,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             theCell.setEnabled(false);
             theCell.setBackground(theCell.getBackground().darker());
             if (gameData.IsMine(column,row)){
+                //TODO instead, ask the model if the game is over when the player hits a mine
                 GameOver();
             } else if (numAdjacent == 0) {
                 caseZero(theCell, visits);
@@ -280,5 +281,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             clickedCell.setText("");
         }
     }
+
+
     //endregion
 }
