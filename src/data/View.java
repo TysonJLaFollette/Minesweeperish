@@ -156,28 +156,44 @@ public class View extends JFrame implements MouseListener, ActionListener{
         boolean nextRow = row + 1 < gameData.GetNumRows();
 
         if(prevCol && prevRow){
-            sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column-1,row-1})), visits);
+            int cellIndex = ConvertCoordinatesToIndex(new int[] {column-1,row-1});
+            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
+            sweepCell(cellToSweep, visits);
         }
         if (prevRow){
-            sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column,row-1})), visits);
+            int cellIndex = ConvertCoordinatesToIndex(new int[] {column,row-1});
+            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
+            sweepCell(cellToSweep, visits);
         }
         if (nextCol && prevRow){
-            sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column+1,row-1})), visits);
+            int cellIndex = ConvertCoordinatesToIndex(new int[] {column+1,row-1});
+            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
+            sweepCell(cellToSweep, visits);
         }
         if (prevCol) {
-            sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column-1,row})), visits);
+            int cellIndex = ConvertCoordinatesToIndex(new int[] {column-1,row});
+            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
+            sweepCell(cellToSweep, visits);
         }
         if (nextCol) {
-            sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column+1,row})), visits);
+            int cellIndex = ConvertCoordinatesToIndex(new int[] {column+1,row});
+            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
+            sweepCell(cellToSweep, visits);
         }
         if (prevCol && nextRow){
-            sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column-1,row+1})), visits);
+            int cellIndex = ConvertCoordinatesToIndex(new int[] {column-1,row+1});
+            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
+            sweepCell(cellToSweep, visits);
         }
         if (nextRow){
-            sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column,row+1})), visits);
+            int cellIndex = ConvertCoordinatesToIndex(new int[] {column,row+1});
+            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
+            sweepCell(cellToSweep, visits);
         }
         if (nextCol && nextRow){
-            sweepCell((Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[] {column+1,row+1})), visits);
+            int cellIndex = ConvertCoordinatesToIndex(new int[] {column+1,row+1});
+            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
+            sweepCell(cellToSweep, visits);
         }
     }
 
