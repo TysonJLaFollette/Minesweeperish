@@ -1,4 +1,5 @@
 import Model.Model;
+import data.View;
 
 import javax.swing.*;
 
@@ -8,6 +9,6 @@ public class Game {
      * @param args command line arguments.
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Model(24,24,10));
+        SwingUtilities.invokeLater(() -> new View());
     }
 }

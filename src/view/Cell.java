@@ -50,12 +50,4 @@ public class Cell extends JButton{
 		setIcon(img);
 		this.update(this.getGraphics());
 	}
-
-	/**
-     * Sets the Cell's background color.
-	 * @param color A Color to replace the Cell's current background Color.
-	 */
-	public void setColor(Color color){
-		setBackground(color);
-	}
 }

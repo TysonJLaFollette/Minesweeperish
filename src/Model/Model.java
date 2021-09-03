@@ -1,14 +1,10 @@
 package Model;
 
-import data.View;
-import view.Cell;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Set;
 
 public class Model implements ActionListener {
     //region Properties
@@ -17,7 +13,6 @@ public class Model implements ActionListener {
     ArrayList<ArrayList<Boolean>> questionLocations;
     ArrayList<ArrayList<Boolean>> sweptLocations;
     ArrayList<ArrayList<Integer>> adjacencyCounts;
-    private final View userInterface;
     int numRows;
     int numCols;
     int numMines;
@@ -41,7 +36,6 @@ public class Model implements ActionListener {
         this.sweptLocations = new ArrayList<>();
         this.adjacencyCounts = new ArrayList<>();
         InitializeField(numRows, numCols, numMines);
-        this.userInterface = new View(this);
         timer.start();
     }
 

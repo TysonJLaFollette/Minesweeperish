@@ -1,6 +1,3 @@
-/**
- * 
- */
 package view;
 
 import java.awt.Dimension;
@@ -8,8 +5,6 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
-
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -24,22 +19,17 @@ public class ScorePanel extends JPanel{
 	/**
 	 * Contains number of mines remaining.
 	 */
-	private JLabel minesLabel = new JLabel("Mines:");
+	private final JLabel minesLabel = new JLabel("Mines:");
 
 	/**
 	 * Contains the timer counter.
 	 */
-	private JLabel timerLabel = new JLabel("Time:");
+	private final JLabel timerLabel = new JLabel("Time:");
 
 	/**
 	 * The icon that appears on the start button.
 	 */
-	private ImageIcon startIcon = new ImageIcon("data/mine.gif");
-
-	/**
-	 * The start button. When pressed, it should start the game.
-	 */
-	private JButton startButton = new JButton(startIcon);
+	private final ImageIcon startIcon = new ImageIcon("data/mine.gif");
 
 	/**
 	 * A font to use within the ScorePanel. Only necessary because of the grading rubric.
@@ -60,6 +50,7 @@ public class ScorePanel extends JPanel{
 		this.add(minesLabel, constraints);
 		constraints.gridx = 1;
 		constraints.gridwidth = 1;
+		JButton startButton = new JButton(startIcon);
 		this.add(startButton, constraints);
 		constraints.gridx = 2;
 		constraints.gridwidth = 1;
@@ -75,7 +66,7 @@ public class ScorePanel extends JPanel{
 	 * @param num The quantity of mines to report.
 	 */
 	public void setMines(int num){
-		minesLabel.setText("Mines: " + Integer.toString(num));
+		minesLabel.setText("Mines: " + num);
 		update(getGraphics());
 	}
 
@@ -84,7 +75,7 @@ public class ScorePanel extends JPanel{
 	 * @param secs The number of seconds to display.
 	 */
 	public void setTime(int secs){
-		timerLabel.setText("Time: " + Integer.toString(secs));
+		timerLabel.setText("Time: " + secs);
 		update(getGraphics());
 	}
 }

@@ -30,8 +30,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
     //endregion
 
     //region Constructors
-    public View(Model gameData){
-        this.gameData = gameData;
+    public View(){
+        this.gameData = new Model();
         InitGraphics();
     }
     //endregion
