@@ -1,4 +1,4 @@
-package data;
+package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -13,10 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-
 import Model.Model;
-import view.Cell;
-import view.ScorePanel;
 
 public class View extends JFrame implements MouseListener, ActionListener{
     //region Properties
@@ -31,8 +28,9 @@ public class View extends JFrame implements MouseListener, ActionListener{
 
     //region Constructors
     public View(){
-        this.gameData = new Model();
+        this.gameData = new Model(24,24,100);
         InitGraphics();
+        timer.start();
     }
     //endregion
 
@@ -42,11 +40,14 @@ public class View extends JFrame implements MouseListener, ActionListener{
         Object source = arg0.getSource();
         if (! (source instanceof Cell)){ return; }
         Cell clickedCell = (Cell)source;
+        int column = clickedCell.getColumn();
+        int row = clickedCell.getRow();
         if (!clickedCell.isEnabled()) { return; }
+        gameData.startGame();
         if(SwingUtilities.isLeftMouseButton(arg0)){
-            startSweep(clickedCell);
+            startSweep(column, row);
         } else if(SwingUtilities.isRightMouseButton(arg0)){
-            CycleFlags(clickedCell);
+            CycleFlags(column, row);
         }
         gameData.flagCheck();
         if (gameData.isTheGameOver()){
@@ -73,9 +74,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
             newGame();
         }
         if(source == timer){
-            scorePanel.setTime(gameData.getGameDuration());
+            scorePanel.setTime(gameData.getSecondsElapsed());
         }
-
     }
     //endregion
 
@@ -103,11 +103,10 @@ public class View extends JFrame implements MouseListener, ActionListener{
         }
         this.setLocationRelativeTo(null);
         this.setVisible(true);
-        timer.start();
     }
 
     public void GameOver(){
-        timer.stop();
+        gameData.stopGame();
         for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
             for(int curRow = 0; curRow < gameData.GetNumRows(); curRow++){
                 Cell curCell = (Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[]{curCol,curRow}));
@@ -127,7 +126,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             }
         }
         if(gameData.didPlayerWin()){
-            JOptionPane.showMessageDialog(null,"End! Your time was " + gameData.getGameDuration() + " seconds.");
+            JOptionPane.showMessageDialog(null,"End! Your time was " + gameData.getSecondsElapsed() + " seconds.");
         }
         else{
             JOptionPane.showMessageDialog(null,"End!");
@@ -144,9 +143,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
         return coordinates[1] * gameData.GetNumCols() + coordinates[0];
     }
 
-    private void startSweep(Cell clickedCell){
-        int column = clickedCell.getColumn();
-        int row = clickedCell.getRow();
+    private void startSweep(int column, int row){
         gameData.startSweep(column,row);
         for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
             for(int curRow = 0; curRow < gameData.GetNumRows(); curRow++){
@@ -164,7 +161,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     private void newGame(){
-        timer.stop();
         for(int curIndex = 0; curIndex < gameData.GetNumRows() * gameData.GetNumCols(); curIndex++){
             int column = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
             int row = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
@@ -188,10 +184,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
         update(getGraphics());
     }
 
-    private void CycleFlags(Cell clickedCell){
-        int column = clickedCell.getColumn();
-        int row = clickedCell.getRow();
-
+    private void CycleFlags(int column, int row){
+        Cell clickedCell = (Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[]{column,row}));
         if(!gameData.IsFlag(column,row) && !gameData.IsQuestion(column,row)){
             gameData.AddFlag(column,row);
             clickedCell.setImage(flagIcon);

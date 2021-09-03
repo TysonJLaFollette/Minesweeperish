@@ -27,11 +27,6 @@ public class ScorePanel extends JPanel{
 	private final JLabel timerLabel = new JLabel("Time:");
 
 	/**
-	 * The icon that appears on the start button.
-	 */
-	private final ImageIcon startIcon = new ImageIcon("data/mine.gif");
-
-	/**
 	 * A font to use within the ScorePanel. Only necessary because of the grading rubric.
 	 */
 	Font font = new Font("Serif", Font.ITALIC, 20);
@@ -50,6 +45,7 @@ public class ScorePanel extends JPanel{
 		this.add(minesLabel, constraints);
 		constraints.gridx = 1;
 		constraints.gridwidth = 1;
+		ImageIcon startIcon = new ImageIcon("data/mine.gif");
 		JButton startButton = new JButton(startIcon);
 		this.add(startButton, constraints);
 		constraints.gridx = 2;

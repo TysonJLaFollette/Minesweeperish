@@ -1,5 +1,4 @@
-import Model.Model;
-import data.View;
+import view.View;
 
 import javax.swing.*;
 

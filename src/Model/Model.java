@@ -16,7 +16,7 @@ public class Model implements ActionListener {
     int numRows;
     int numCols;
     int numMines;
-    int gameDuration = 0;
+    int secondsElapsed = 0;
     private boolean gameIsOver = true;
     private boolean playerVictorious = false;
     private final Timer timer = new Timer(1000, this);
@@ -36,7 +36,14 @@ public class Model implements ActionListener {
         this.sweptLocations = new ArrayList<>();
         this.adjacencyCounts = new ArrayList<>();
         InitializeField(numRows, numCols, numMines);
+    }
+
+    public void startGame(){
         timer.start();
+    }
+
+    public void stopGame(){
+        timer.stop();
     }
 
     public int GetNumRows() {
@@ -163,7 +170,7 @@ public class Model implements ActionListener {
         CreateMinefield(numRows, numCols);
         PlantMines(numMines);
         gameIsOver = false;
-        gameDuration = 0;
+        secondsElapsed = 0;
     }
 
     /**
@@ -221,12 +228,12 @@ public class Model implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
         if(source == timer){
-            gameDuration++;
+            secondsElapsed++;
         }
     }
 
-    public int getGameDuration(){
-        return gameDuration;
+    public int getSecondsElapsed(){
+        return secondsElapsed;
     }
 
     public boolean isTheGameOver(){
