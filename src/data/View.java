@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -104,6 +103,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
         }
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+        timer.start();
     }
 
     public void GameOver(){
@@ -144,90 +144,21 @@ public class View extends JFrame implements MouseListener, ActionListener{
         return coordinates[1] * gameData.GetNumCols() + coordinates[0];
     }
 
-    private void caseZero(Cell theCell, ArrayList<ArrayList<Boolean>> visits){
-        int column = theCell.getColumn();
-        int row = theCell.getRow();
-        boolean prevCol = column - 1 >= 0;
-        boolean nextCol = column + 1 < gameData.GetNumCols();
-        boolean prevRow = row - 1 >= 0;
-        boolean nextRow = row + 1 < gameData.GetNumRows();
-
-        if(prevCol && prevRow){
-            int cellIndex = ConvertCoordinatesToIndex(new int[] {column-1,row-1});
-            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
-            sweepCell(cellToSweep, visits);
-        }
-        if (prevRow){
-            int cellIndex = ConvertCoordinatesToIndex(new int[] {column,row-1});
-            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
-            sweepCell(cellToSweep, visits);
-        }
-        if (nextCol && prevRow){
-            int cellIndex = ConvertCoordinatesToIndex(new int[] {column+1,row-1});
-            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
-            sweepCell(cellToSweep, visits);
-        }
-        if (prevCol) {
-            int cellIndex = ConvertCoordinatesToIndex(new int[] {column-1,row});
-            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
-            sweepCell(cellToSweep, visits);
-        }
-        if (nextCol) {
-            int cellIndex = ConvertCoordinatesToIndex(new int[] {column+1,row});
-            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
-            sweepCell(cellToSweep, visits);
-        }
-        if (prevCol && nextRow){
-            int cellIndex = ConvertCoordinatesToIndex(new int[] {column-1,row+1});
-            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
-            sweepCell(cellToSweep, visits);
-        }
-        if (nextRow){
-            int cellIndex = ConvertCoordinatesToIndex(new int[] {column,row+1});
-            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
-            sweepCell(cellToSweep, visits);
-        }
-        if (nextCol && nextRow){
-            int cellIndex = ConvertCoordinatesToIndex(new int[] {column+1,row+1});
-            Cell cellToSweep = (Cell)gamePanel.getComponent(cellIndex);
-            sweepCell(cellToSweep, visits);
-        }
-    }
-
     private void startSweep(Cell clickedCell){
-        timer.start();
         int column = clickedCell.getColumn();
         int row = clickedCell.getRow();
-        if(gameData.IsFlag(column, row)){ return; }
-        ArrayList<ArrayList<Boolean>> visits = new ArrayList<>();
+        gameData.startSweep(column,row);
         for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
-            visits.add(new ArrayList<>());
-            for (int curRow = 0; curRow < gameData.GetNumRows(); curRow++){
-                visits.get(curCol).add(false);
-            }
-        }
-        sweepCell(clickedCell, visits);
-    }
-
-    private void sweepCell(Cell theCell, ArrayList<ArrayList<Boolean>> visits){
-        //TODO make the presenter handle sweeps and cascades.
-        int column = theCell.getColumn();
-        int row = theCell.getRow();
-        int numAdjacent = gameData.GetNumAdjacent(column,row);
-        if(visits.get(column).get(row)){
-            return;
-        }
-        visits.get(column).set(row, true);
-        if(theCell.isEnabled()){
-            theCell.setEnabled(false);
-            theCell.setBackground(theCell.getBackground().darker());
-            if (gameData.IsMine(column,row)){
-                //TODO instead, ask the model if the game is over when the player hits a mine
-                GameOver();
-            } else if (numAdjacent == 0) {
-                caseZero(theCell, visits);
-            } else {
-                theCell.setText(Integer.toString(numAdjacent));
+            for(int curRow = 0; curRow < gameData.GetNumRows(); curRow++){
+                Cell curCell = (Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[]{curCol,curRow}));
+                if (gameData.IsSwept(curCol,curRow)){
+                    int numAdjacent = gameData.GetNumAdjacent(curCol,curRow);
+                    curCell.setEnabled(false);
+                    curCell.setBackground(Color.gray);
+                    if (gameData.GetNumAdjacent(curCol,curRow) > 0) {
+                        curCell.setText(Integer.toString(numAdjacent));
+                    }
+                }
             }
         }
     }
@@ -281,7 +212,5 @@ public class View extends JFrame implements MouseListener, ActionListener{
             clickedCell.setText("");
         }
     }
-
-
     //endregion
 }

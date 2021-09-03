@@ -1,12 +1,14 @@
 package Model;
 
 import data.View;
+import view.Cell;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 
 public class Model implements ActionListener {
     //region Properties
@@ -239,5 +241,69 @@ public class Model implements ActionListener {
 
     public boolean didPlayerWin(){
         return playerVictorious;
+    }
+
+    public void startSweep(int column, int row){
+        timer.start();
+        if(IsFlag(column, row)){ return; }
+        ArrayList<ArrayList<Boolean>> visits = new ArrayList<>();
+        for (int curCol = 0; curCol < GetNumCols(); curCol++){
+            visits.add(new ArrayList<>());
+            for (int curRow = 0; curRow < GetNumRows(); curRow++){
+                visits.get(curCol).add(false);
+            }
+        }
+        sweepCell(column, row, visits);
+    }
+
+    private void sweepCell(int column, int row, ArrayList<ArrayList<Boolean>> visits) {
+        int numAdjacent = GetNumAdjacent(column, row);
+        if (visits.get(column).get(row)) {
+            return;
+        }
+        visits.get(column).set(row, true);
+        if (!IsSwept(column, row)) {
+            if (IsMine(column, row)) {
+                gameIsOver = true;
+                playerVictorious = false;
+            } else if (numAdjacent == 0) {
+                SetSwept(column,row);
+                caseZero(column, row, visits);
+            } else {
+                SetSwept(column, row);
+            }
+        }
+    }
+
+    private void caseZero(int column, int row, ArrayList<ArrayList<Boolean>> visits){
+        boolean prevCol = column - 1 >= 0;
+        boolean nextCol = column + 1 < GetNumCols();
+        boolean prevRow = row - 1 >= 0;
+        boolean nextRow = row + 1 < GetNumRows();
+
+        if(prevCol && prevRow){
+            sweepCell(column -1, row -1, visits);
+        }
+        if (prevRow){
+            sweepCell(column, row - 1, visits);
+        }
+        if (nextCol && prevRow){
+            sweepCell(column + 1, row -1, visits);
+        }
+        if (prevCol) {
+            sweepCell(column -1, row, visits);
+        }
+        if (nextCol) {
+            sweepCell(column + 1, row, visits);
+        }
+        if (prevCol && nextRow){
+            sweepCell(column - 1, row + 1, visits);
+        }
+        if (nextRow){
+            sweepCell(column, row + 1, visits);
+        }
+        if (nextCol && nextRow){
+            sweepCell(column + 1, row + 1, visits);
+        }
     }
 }
