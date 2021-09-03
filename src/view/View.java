@@ -28,7 +28,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
 
     //region Constructors
     public View(){
-        this.gameData = new Model(24,24,100);
+        this.gameData = new Model(24,24,10);
         InitGraphics();
         timer.start();
     }
@@ -43,7 +43,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
         int column = clickedCell.getColumn();
         int row = clickedCell.getRow();
         if (!clickedCell.isEnabled()) { return; }
-        gameData.startGame();
         if(SwingUtilities.isLeftMouseButton(arg0)){
             startSweep(column, row);
         } else if(SwingUtilities.isRightMouseButton(arg0)){
@@ -106,7 +105,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     public void GameOver(){
-        gameData.stopGame();
         for (int curCol = 0; curCol < gameData.GetNumCols(); curCol++){
             for(int curRow = 0; curRow < gameData.GetNumRows(); curRow++){
                 Cell curCell = (Cell)gamePanel.getComponent(ConvertCoordinatesToIndex(new int[]{curCol,curRow}));
@@ -179,7 +177,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
             gamePanel.add(tmpCell);
         }
 
-        gameData.InitializeField(24,24, 100);
+        gameData.NewGame(24,24, 100);
         gamePanel.revalidate();
         update(getGraphics());
     }

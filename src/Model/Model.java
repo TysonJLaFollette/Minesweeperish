@@ -23,6 +23,7 @@ public class Model implements ActionListener {
     //endregion
 
     public Model(){
+        //If not given parameters, just start with defaults.
         this(24,24,100);
     }
 
@@ -35,15 +36,7 @@ public class Model implements ActionListener {
         this.questionLocations = new ArrayList<>();
         this.sweptLocations = new ArrayList<>();
         this.adjacencyCounts = new ArrayList<>();
-        InitializeField(numRows, numCols, numMines);
-    }
-
-    public void startGame(){
-        timer.start();
-    }
-
-    public void stopGame(){
-        timer.stop();
+        NewGame(numRows, numCols, numMines);
     }
 
     public int GetNumRows() {
@@ -63,11 +56,15 @@ public class Model implements ActionListener {
     }
 
     public void AddFlag(int column, int row) {
+        timer.start();
         flagLocations.get(column).set(row,true);
+        flagCheck();
     }
 
     public void RemoveFlag(int column, int row) {
+        timer.start();
         flagLocations.get(column).set(row,false);
+        flagCheck();
     }
 
     public boolean IsFlag(int column, int row) {
@@ -75,10 +72,12 @@ public class Model implements ActionListener {
     }
 
     public void AddQuestionMark(int column, int row) {
+        timer.start();
         questionLocations.get(column).set(row, true);
     }
 
     public void RemoveQuestionMark(int column, int row) {
+        timer.start();
         questionLocations.get(column).set(row,false);
     }
 
@@ -98,11 +97,11 @@ public class Model implements ActionListener {
         return sweptLocations.get(column).get(row);
     }
 
-    public void SetSwept(int column, int row) {
+    protected void SetSwept(int column, int row) {
         sweptLocations.get(column).set(row, true);
     }
 
-    public void CreateMinefield(int numCols, int numRows) {
+    protected void CreateMinefield(int numCols, int numRows) {
         this.numCols = numCols;
         this.numRows = numRows;
         this.numMines = 0;
@@ -128,7 +127,7 @@ public class Model implements ActionListener {
         }
     }
 
-    public void IncrementAdjacencies(int column, int row) {
+    protected void IncrementAdjacencies(int column, int row) {
         if (column - 1 >= 0 && row - 1 >= 0){
             int curValue = adjacencyCounts.get(column - 1).get(row - 1);
             adjacencyCounts.get(column - 1).set(row - 1,curValue + 1);
@@ -166,10 +165,11 @@ public class Model implements ActionListener {
     /**
      * Creates a minefield with the desired number of mines.
      */
-    public void InitializeField(int numRows, int numCols, int numMines){
+    public void NewGame(int numRows, int numCols, int numMines){
         CreateMinefield(numRows, numCols);
         PlantMines(numMines);
         gameIsOver = false;
+        timer.stop();
         secondsElapsed = 0;
     }
 
@@ -177,7 +177,7 @@ public class Model implements ActionListener {
      * Plants the desired number of mines randomly within the given minefield.
      * @param numMines The number of mines to place.
      */
-    public void PlantMines(int numMines){
+    protected void PlantMines(int numMines){
         ArrayList<Boolean> listToShuffle = new ArrayList<>();
         for (int i = 0; i < GetNumRows()*GetNumCols(); i++){
             boolean cellValue = i < numMines;
@@ -219,6 +219,7 @@ public class Model implements ActionListener {
             }
         }
         if(minesRight == numMines){
+            timer.stop();
             playerVictorious = true;
             gameIsOver = true;
         }
@@ -265,6 +266,7 @@ public class Model implements ActionListener {
         visits.get(column).set(row, true);
         if (!IsSwept(column, row)) {
             if (IsMine(column, row)) {
+                timer.stop();
                 gameIsOver = true;
                 playerVictorious = false;
             } else if (numAdjacent == 0) {
