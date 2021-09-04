@@ -36,21 +36,20 @@ public class View extends JFrame implements MouseListener, ActionListener{
 
     //region Public Methods
     @Override
-    public void mouseClicked(MouseEvent arg0) {
-        Object source = arg0.getSource();
-        if (! (source instanceof Cell)){ return; }
-        Cell clickedCell = (Cell)source;
-        int column = clickedCell.getColumn();
-        int row = clickedCell.getRow();
-        if (!clickedCell.isEnabled()) { return; }
-        if(SwingUtilities.isLeftMouseButton(arg0)){
-            startSweep(column, row);
-        } else if(SwingUtilities.isRightMouseButton(arg0)){
-            CycleFlags(column, row);
-        }
-        gameData.flagCheck();
-        if (gameData.isTheGameOver()){
-            GameOver();
+    public void mouseClicked(MouseEvent e) {
+        if (e.getSource() instanceof Cell){
+            Cell clickedCell = (Cell)e.getSource();
+            int column = clickedCell.getColumn();
+            int row = clickedCell.getRow();
+            if(SwingUtilities.isLeftMouseButton(e)){
+                startSweep(column, row);
+            } else if(SwingUtilities.isRightMouseButton(e)){
+                CycleFlags(column, row);
+            }
+            gameData.flagCheck();
+            if (gameData.isTheGameOver()){
+                GameOver();
+            }
         }
     }
 
@@ -67,13 +66,11 @@ public class View extends JFrame implements MouseListener, ActionListener{
     public void mouseReleased(MouseEvent e) {}
 
     @Override
-    public void actionPerformed(ActionEvent arg0) {
-        Object source = arg0.getSource();
-        if(source!= timer){
-            newGame();
-        }
-        if(source == timer){
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == timer){
             scorePanel.setTime(gameData.getSecondsElapsed());
+        } else {
+            newGame();
         }
     }
     //endregion
@@ -159,24 +156,18 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     private void newGame(){
-        for(int curIndex = 0; curIndex < gameData.GetNumRows() * gameData.GetNumCols(); curIndex++){
-            int column = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[0];
-            int row = ConvertIndexToCoordinates(curIndex, gameData.GetNumCols(), gameData.GetNumRows())[1];
-            gamePanel.remove(0);
-            gameData.RemoveFlag(column,row);
-            gameData.RemoveQuestionMark(column,row);
+        for (int curRow = 0; curRow < gameData.GetNumCols(); curRow++){
+            for (int curCol = 0; curCol < gameData.GetNumRows(); curCol++){
+                gamePanel.remove(0);
+                Cell tmpCell = new Cell();
+                tmpCell.setColumn(curCol);
+                tmpCell.setRow(curRow);
+                tmpCell.addMouseListener(this);
+                gamePanel.add(tmpCell);
+            }
         }
 
-        for(int i = 0; i < gameData.GetNumRows() * gameData.GetNumCols(); i++){
-            int column = ConvertIndexToCoordinates(i, gameData.GetNumCols(), gameData.GetNumRows())[0];
-            int row = ConvertIndexToCoordinates(i, gameData.GetNumCols(), gameData.GetNumRows())[1];
-            Cell tmpCell = new Cell();
-            tmpCell.setColumn(column);
-            tmpCell.setRow(row);
-            tmpCell.addMouseListener(this);
-            gamePanel.add(tmpCell);
-        }
-
+        //TODO make the new model BEFORE the new view of it
         gameData.NewGame(24,24, 100);
         gamePanel.revalidate();
         update(getGraphics());
