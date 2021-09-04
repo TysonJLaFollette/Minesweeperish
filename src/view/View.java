@@ -156,9 +156,11 @@ public class View extends JFrame implements MouseListener, ActionListener{
     }
 
     private void newGame(){
+        gamePanel.removeAll();
+        gameData.NewGame(24,24, 100);
+
         for (int curRow = 0; curRow < gameData.GetNumCols(); curRow++){
             for (int curCol = 0; curCol < gameData.GetNumRows(); curCol++){
-                gamePanel.remove(0);
                 Cell tmpCell = new Cell();
                 tmpCell.setColumn(curCol);
                 tmpCell.setRow(curRow);
@@ -167,8 +169,6 @@ public class View extends JFrame implements MouseListener, ActionListener{
             }
         }
 
-        //TODO make the new model BEFORE the new view of it
-        gameData.NewGame(24,24, 100);
         gamePanel.revalidate();
         update(getGraphics());
     }
