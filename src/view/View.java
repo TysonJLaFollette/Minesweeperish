@@ -113,6 +113,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
                     } else if (gameData.IsQuestion(curCol,curRow)){
                         curCell.setBackground(Color.YELLOW);
                         curCell.setIcon(mineIcon);
+                        curCell.setText(null);
                     } else {
                         curCell.setBackground(Color.RED);
                         curCell.setIcon(mineIcon);
@@ -121,10 +122,10 @@ public class View extends JFrame implements MouseListener, ActionListener{
             }
         }
         if(gameData.didPlayerWin()){
-            JOptionPane.showMessageDialog(null,"End! Your time was " + gameData.getSecondsElapsed() + " seconds.");
+            JOptionPane.showMessageDialog(null,"Congratulations! Your time was " + gameData.getSecondsElapsed() + " seconds.");
         }
         else{
-            JOptionPane.showMessageDialog(null,"End!");
+            JOptionPane.showMessageDialog(null,"Game Over!");
         }
     }
 
@@ -154,6 +155,8 @@ public class View extends JFrame implements MouseListener, ActionListener{
             }
         }
     }
+
+
 
     private void newGame(){
         gamePanel.removeAll();
