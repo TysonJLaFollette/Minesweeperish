@@ -161,6 +161,7 @@ public class View extends JFrame implements MouseListener, ActionListener{
     private void newGame(){
         gamePanel.removeAll();
         gameData.NewGame(24,24, 100);
+        scorePanel.setMines(gameData.GetNumMines());
 
         for (int curRow = 0; curRow < gameData.GetNumCols(); curRow++){
             for (int curCol = 0; curCol < gameData.GetNumRows(); curCol++){
