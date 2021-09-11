@@ -118,6 +118,12 @@ public class View extends JFrame implements MouseListener, ActionListener{
                         curCell.setBackground(Color.RED);
                         curCell.setIcon(mineIcon);
                     }
+                } else {
+                    curCell.setBackground(Color.gray);
+                    curCell.setEnabled(false);
+                    if (gameData.GetNumAdjacent(curCol, curRow) != 0){
+                        curCell.setText(Integer.toString(gameData.GetNumAdjacent(curCol, curRow)));
+                    }
                 }
             }
         }
